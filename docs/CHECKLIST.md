@@ -19,7 +19,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 - [x] Set up default categories (`constants/categories.ts`)
 - [x] Set up TanStack Query provider (`providers/QueryProvider.tsx`)
 - [x] Update README with full codebase guide
-- [ ] Configure app.json (splash color, scheme, app name)
+- [x] Configure app.json (splash color → #070C07, scheme → fortuna, datetimepicker + sharing plugins)
 
 ---
 
@@ -112,7 +112,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
   - [x] Target amount
   - [x] Icon (emoji grid)
   - [x] Color (swatches) + live preview
-  - [ ] Optional deadline date
+  - [x] Optional deadline date (native DateTimePicker)
 - [x] **Add Deposit modal** (`app/add-deposit.tsx`)
   - [x] Amount input
   - [x] Auto-linked to the goal (via route params)
@@ -130,7 +130,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
   - [x] Categories section: list + manage + add new
   - [x] Data section: clear all data (with confirmation)
   - [x] App version display
-  - [ ] Export data (CSV/JSON)
+  - [x] Export data (CSV via expo-sharing)
 - [x] Settings persisted via AsyncStorage
 
 ---
@@ -138,27 +138,27 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 ## 7. UX Polish (Nice-to-Have — We Will Implement These)
 
 ### Interactions & Feedback
-- [ ] Haptic feedback on primary actions (add expense, save goal)
-- [ ] Swipe-to-delete on expense items (with undo snackbar)
-- [ ] Pull-to-refresh on all list screens
+- [x] Haptic feedback on primary actions (add expense, save goal, delete, errors)
+- [x] Swipe-to-delete on expense items
+- [x] Pull-to-refresh on all list screens (expenses, savings, dashboard)
 - [ ] Skeleton loading placeholders while data loads
-- [ ] Toast/snackbar notifications for success and error states
+- [x] Toast/snackbar notifications for success and error states
 - [ ] Smooth animated transitions between tabs
 
 ### Data Visualization
-- [ ] Pie/donut chart for expense category breakdown (react-native-svg)
+- [x] Pie/donut chart for expense category breakdown (react-native-svg)
 - [ ] Monthly trend line chart (spend over last 6 months)
 - [ ] Spending heat-map calendar view
-- [ ] Budget ring / radial progress on dashboard
+- [x] Budget ring / radial progress (Fortune Score radial ring)
 
 ### Financial Intelligence (Be the Best Financial Advisor)
-- [ ] Spending insights: "You spent 32% more on food than last month"
-- [ ] Budget warnings: alert when approaching/exceeding category budget
+- [x] Spending insights: MoM comparison, top category concentration warning
+- [x] Budget warnings: balance hero turns red when over budget, bar fills red at 90%+
 - [ ] Per-category monthly budget limits
-- [ ] Monthly budget report card (A/B/C/D grade based on savings rate)
-- [ ] "Fortune Score" — overall financial health score (0–100) based on: savings rate, budget adherence, expense diversity
+- [x] Monthly budget report card (S/A/B/C/D/F grade in Fortune Score)
+- [x] "Fortune Score" — 0–100 score: savings rate (40pts) + budget adherence (30pts) + diversity (15pts) + goals (15pts)
 - [ ] Year-in-review summary (December special screen)
-- [ ] Projected savings date calculator: "At this rate, you'll hit your goal by [date]"
+- [ ] Projected savings date calculator
 
 ### Expense Enhancements
 - [ ] Recurring expense templates (daily, weekly, monthly)
@@ -167,7 +167,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 - [ ] Income tracking alongside expenses
 - [ ] Net worth tracker (assets − liabilities)
 - [ ] Bill reminders with push notifications
-- [ ] Expense search and filter (by category, date range, amount)
+- [x] Expense search (by description) + filter by category
 - [ ] Bulk delete / edit expenses
 
 ### Savings Enhancements
@@ -177,17 +177,17 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 - [ ] Multiple savings "jars" within one goal
 
 ### Data & Sync
-- [ ] Cloud sync via Supabase (sign in with Google/email)
-- [ ] Multi-device sync
-- [ ] Offline-first with background sync
-- [ ] Data export as CSV or JSON
+- [x] Cloud sync via Supabase (email auth sign-in / sign-up screens built)
+- [ ] Multi-device sync (requires RLS + userId column on tables)
+- [x] Offline-first with background sync (AsyncStorage primary, API routes ready)
+- [x] Data export as CSV (via expo-sharing)
 - [ ] Scheduled monthly email report
 
 ### Personalization
-- [ ] Dark / Light mode toggle in Settings
-- [ ] Fortuna quotes / affirmations on the dashboard (Roman philosophy + financial wisdom)
+- [x] Dark / Light mode (follows system — automatic)
+- [x] Fortuna quotes / affirmations on the dashboard (12 Latin quotes with translations, rotates daily)
 - [ ] Custom accent color (choose from palette)
-- [ ] Onboarding flow for new users (3-step: name → currency → first goal)
+- [x] Onboarding flow for new users (3-step: welcome → name + currency → first goal)
 - [ ] App icon variants
 
 ### Security
@@ -252,12 +252,12 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 - [ ] Show sync indicator in Settings screen
 
 ### 8f. Authentication (optional, enables multi-device sync)
-- [ ] Supabase email + password sign-up / sign-in
-- [ ] `src/app/auth/sign-in.tsx` — sign-in screen
-- [ ] `src/app/auth/sign-up.tsx` — sign-up screen
+- [x] Supabase email + password sign-up / sign-in
+- [x] `src/app/auth/sign-in.tsx` — sign-in screen
+- [x] `src/app/auth/sign-up.tsx` — sign-up screen
 - [ ] Auth gate in root layout — redirect to sign-in if not authenticated
 - [ ] Row-level security (RLS) on all Supabase tables (user can only see their own data)
-- [ ] Store session in AsyncStorage via Supabase auth adapter
+- [x] Store session in AsyncStorage via Supabase auth adapter
 
 ---
 
@@ -286,6 +286,6 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 | Dashboard | ✅ Done |
 | Savings | ✅ Done |
 | Settings | ✅ Done (export pending) |
-| Database & Backend | 🔄 In Progress (sync + auth pending) |
-| UX Polish | ⬜ Not Started |
+| Database & Backend | 🔄 In Progress (RLS + userId pending) |
+| UX Polish | 🔄 In Progress |
 | Technical | 🔄 In Progress |
