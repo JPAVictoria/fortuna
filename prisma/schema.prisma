@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  icon      String
+  color     String
+  isDefault Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  expenses  Expense[]
+
+  @@map("categories")
+}
+
+model Expense {
+  id          String    @id @default(cuid())
+  amount      Float
+  description String
+  date        DateTime
+  notes       String?
+  createdAt   DateTime  @default(now())
+
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+
+  @@map("expenses")
+}
+
+model SavingsGoal {
+  id            String           @id @default(cuid())
+  name          String
+  targetAmount  Float
+  currentAmount Float            @default(0)
+  deadline      DateTime?
+  icon          String
+  color         String
+  createdAt     DateTime         @default(now())
+
+  deposits      SavingsDeposit[]
+
+  @@map("savings_goals")
+}
+
+model SavingsDeposit {
+  id        String      @id @default(cuid())
+  amount    Float
+  date      DateTime
+  notes     String?
+  createdAt DateTime    @default(now())
+
+  goalId    String
+  goal      SavingsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@map("savings_deposits")
+}
+
+model AppSettings {
+  id             String   @id @default(cuid())
+  userName       String   @default("You")
+  currency       String   @default("PHP")
+  currencySymbol String   @default("₱")
+  monthlyBudget  Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("app_settings")
+}

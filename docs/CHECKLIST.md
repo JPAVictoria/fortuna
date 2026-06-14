@@ -206,42 +206,42 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 > Architecture: mobile app (AsyncStorage offline-first) ↔ Expo Router API routes (server) ↔ Prisma ↔ Supabase PostgreSQL
 
 ### 8a. Environment & Security
-- [ ] Add `.env` to `.gitignore` (never commit secrets)
-- [ ] Create `.env` with all required keys (user fills in values)
-- [ ] Create `.env.example` as a safe committed reference template
-- [ ] Verify `.env` is not tracked by git
+- [x] Add `.env` to `.gitignore` (never commit secrets)
+- [x] Create `.env` with all required keys (user fills in values)
+- [x] Create `.env.example` as a safe committed reference template
+- [x] Verify `.env` is not tracked by git
 
 ### 8b. Prisma Setup
-- [ ] Install `prisma` and `@prisma/client` as dependencies
-- [ ] Run `npx prisma init` to scaffold `prisma/schema.prisma`
-- [ ] Configure `datasource db` to use `DATABASE_URL` + `DIRECT_URL` (pgBouncer-safe)
-- [ ] Define all models matching app TypeScript types:
-  - [ ] `Category` (id, name, icon, color, isDefault, createdAt)
-  - [ ] `Expense` (id, amount, description, categoryId → Category, date, notes, createdAt)
-  - [ ] `SavingsGoal` (id, name, targetAmount, currentAmount, deadline?, icon, color, createdAt)
-  - [ ] `SavingsDeposit` (id, goalId → SavingsGoal cascade, amount, date, notes, createdAt)
-  - [ ] `AppSettings` (id, userName, currency, currencySymbol, monthlyBudget?, updatedAt)
-- [ ] Cascade deletes: deleting a goal deletes its deposits; deleting a category nullifies expenses
-- [ ] Create `src/lib/prisma.ts` — singleton Prisma client (dev-safe, no duplicate connections)
-- [ ] **User runs:** `npx prisma migrate dev --name init` to create the database schema
+- [x] Install `prisma@5.22.0` and `@prisma/client@5.22.0` (stable, matches tara-laro)
+- [x] Configure `prisma/schema.prisma` with `DATABASE_URL` + `DIRECT_URL` (pgBouncer-safe)
+- [x] Define all models matching app TypeScript types:
+  - [x] `Category` (id, name, icon, color, isDefault, createdAt)
+  - [x] `Expense` (id, amount, description, categoryId → Category, date, notes, createdAt)
+  - [x] `SavingsGoal` (id, name, targetAmount, currentAmount, deadline?, icon, color, createdAt)
+  - [x] `SavingsDeposit` (id, goalId → SavingsGoal cascade, amount, date, notes, createdAt)
+  - [x] `AppSettings` (id, userName, currency, currencySymbol, monthlyBudget?, updatedAt)
+- [x] Cascade deletes: deleting a goal deletes its deposits
+- [x] Create `src/lib/prisma.ts` — singleton Prisma client (dev-safe, no duplicate connections)
+- [ ] **User runs:** `npx prisma migrate dev --name init` to push schema to Supabase
 - [ ] **User runs:** `npx prisma generate` to generate the typed client
 
 ### 8c. Supabase Client
-- [ ] Create `src/lib/supabase.ts` — typed Supabase client using env vars
-- [ ] Import `react-native-url-polyfill` at app entry point (required for Supabase on RN)
-- [ ] Add `AsyncStorage` as Supabase auth storage adapter
+- [x] Create `src/lib/supabase.ts` — typed Supabase client using env vars
+- [x] Import `react-native-url-polyfill/auto` at app entry point (required for Supabase on RN)
+- [x] Add `AsyncStorage` as Supabase auth storage adapter
 
 ### 8d. Expo Router API Routes (server-side endpoints)
-- [ ] `src/app/api/expenses+api.ts` — GET (list), POST (create)
-- [ ] `src/app/api/expenses/[id]+api.ts` — DELETE
-- [ ] `src/app/api/categories+api.ts` — GET (list), POST (create), DELETE
-- [ ] `src/app/api/savings/goals+api.ts` — GET, POST
-- [ ] `src/app/api/savings/goals/[id]+api.ts` — DELETE
-- [ ] `src/app/api/savings/deposits+api.ts` — POST
-- [ ] `src/app/api/settings+api.ts` — GET, PUT
-- [ ] All routes use Prisma client (server only — never imported in RN bundle)
-- [ ] All routes return consistent `{ data, error }` response shape
-- [ ] Input validation on all POST/PUT routes
+- [x] `src/app/api/expenses+api.ts` — GET (list), POST (create)
+- [x] `src/app/api/expenses/[id]+api.ts` — DELETE
+- [x] `src/app/api/categories+api.ts` — GET (list), POST (create); seeds defaults on first call
+- [x] `src/app/api/categories/[id]+api.ts` — DELETE (blocks default categories)
+- [x] `src/app/api/savings/goals+api.ts` — GET, POST
+- [x] `src/app/api/savings/goals/[id]+api.ts` — DELETE (cascade via schema)
+- [x] `src/app/api/savings/deposits+api.ts` — POST (Prisma transaction: create deposit + increment goal)
+- [x] `src/app/api/settings+api.ts` — GET (auto-creates defaults), PUT
+- [x] All routes use Prisma client (server only — never imported in RN bundle)
+- [x] All routes return consistent `{ data, error }` response shape
+- [x] Input validation on all POST/PUT routes
 
 ### 8e. Sync Layer (mobile ↔ server)
 - [ ] Create `src/lib/sync.ts` — sync local AsyncStorage data to server via API routes
@@ -286,6 +286,6 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 | Dashboard | ✅ Done |
 | Savings | ✅ Done |
 | Settings | ✅ Done (export pending) |
-| Database & Backend | ⬜ Not Started |
+| Database & Backend | 🔄 In Progress (sync + auth pending) |
 | UX Polish | ⬜ Not Started |
 | Technical | 🔄 In Progress |
