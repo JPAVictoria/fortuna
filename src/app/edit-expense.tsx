@@ -1,31 +1,49 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import { useAddExpense, useCategories } from '@/hooks/useExpenses';
-import { useHaptics } from '@/hooks/useHaptics';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
+import { useTheme } from '@/hooks/use-theme';
+import { useCategories, useUpdateExpense } from '@/hooks/useExpenses';
+import { useHaptics } from '@/hooks/useHaptics';
 import { useToast } from '@/providers/ToastProvider';
-import { formatDate, todayISO } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 
-export default function AddExpenseModal() {
+export default function EditExpenseModal() {
   const theme = useTheme();
-  const { data: categories = [] } = useCategories();
-  const { mutate: addExpense, isPending } = useAddExpense();
   const haptics = useHaptics();
   const toast = useToast();
+  const { mutate: updateExpense, isPending } = useUpdateExpense();
+  const { data: categories = [] } = useCategories();
 
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
-  const [notes, setNotes] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState('');
-  const [date, setDate] = useState(new Date(todayISO()));
+  const params = useLocalSearchParams<{
+    id: string;
+    amount: string;
+    description: string;
+    categoryId: string;
+    date: string;
+    notes: string;
+  }>();
+
+  const [amount, setAmount] = useState(params.amount ?? '');
+  const [description, setDescription] = useState(params.description ?? '');
+  const [notes, setNotes] = useState(params.notes ?? '');
+  const [selectedCategoryId, setSelectedCategoryId] = useState(params.categoryId ?? '');
+  const [date, setDate] = useState(new Date(params.date ?? Date.now()));
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   function handleSubmit() {
@@ -46,17 +64,24 @@ export default function AddExpenseModal() {
       return;
     }
 
-    addExpense(
-      { amount: parsed, description: description.trim(), categoryId: selectedCategoryId, date: date.toISOString(), notes: notes.trim() || undefined },
+    updateExpense(
+      {
+        id: params.id,
+        amount: parsed,
+        description: description.trim(),
+        categoryId: selectedCategoryId,
+        date: date.toISOString(),
+        notes: notes.trim() || undefined,
+      },
       {
         onSuccess: () => {
           haptics.success();
-          toast('Expense logged!');
+          toast('Expense updated!');
           router.back();
         },
         onError: () => {
           haptics.error();
-          toast('Failed to save expense', 'error');
+          toast('Failed to update expense', 'error');
         },
       }
     );
@@ -68,15 +93,31 @@ export default function AddExpenseModal() {
         <View style={styles.handleWrap}><View style={[styles.handle, { backgroundColor: theme.border }]} /></View>
 
         <View style={styles.titleRow}>
-          <Text style={[styles.title, { color: theme.text }]}>Log Expense</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Edit Expense</Text>
           <TouchableOpacity onPress={() => router.back()} hitSlop={16}>
             <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
-          <Input label="Amount" prefix={DEFAULT_CURRENCY_SYMBOL} placeholder="0.00" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" returnKeyType="next" autoFocus autoCorrect={false} />
-          <Input label="Description" placeholder="What did you spend on?" value={description} onChangeText={setDescription} returnKeyType="next" autoCorrect={false} />
+          <Input
+            label="Amount"
+            prefix={DEFAULT_CURRENCY_SYMBOL}
+            placeholder="0.00"
+            value={amount}
+            onChangeText={setAmount}
+            keyboardType="decimal-pad"
+            returnKeyType="next"
+            autoFocus
+          />
+          <Input
+            label="Description"
+            placeholder="What did you spend on?"
+            value={description}
+            onChangeText={setDescription}
+            returnKeyType="next"
+            autoCorrect={false}
+          />
 
           <View style={styles.field}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>CATEGORY</Text>
@@ -87,7 +128,11 @@ export default function AddExpenseModal() {
                   <TouchableOpacity
                     key={cat.id}
                     onPress={() => { haptics.light(); setSelectedCategoryId(cat.id); }}
-                    style={[styles.chip, { backgroundColor: active ? cat.color + '33' : theme.backgroundElement, borderColor: active ? cat.color : theme.border, borderWidth: active ? 1.5 : 1 }]}>
+                    style={[styles.chip, {
+                      backgroundColor: active ? cat.color + '33' : theme.backgroundElement,
+                      borderColor: active ? cat.color : theme.border,
+                      borderWidth: active ? 1.5 : 1,
+                    }]}>
                     <Text style={styles.chipIcon}>{cat.icon}</Text>
                     <Text style={[styles.chipLabel, { color: active ? cat.color : theme.textMuted }]}>{cat.name}</Text>
                   </TouchableOpacity>
@@ -110,7 +155,6 @@ export default function AddExpenseModal() {
             <DateTimePicker
               value={date}
               mode="date"
-              maximumDate={new Date(todayISO())}
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={(_, d) => {
                 setShowDatePicker(Platform.OS === 'ios');
@@ -119,8 +163,15 @@ export default function AddExpenseModal() {
             />
           )}
 
-          <Input label="Notes (optional)" placeholder="Add a note..." value={notes} onChangeText={setNotes} multiline style={{ minHeight: 64, textAlignVertical: 'top' }} />
-          <Button label="Log Expense" onPress={handleSubmit} loading={isPending} fullWidth size="lg" style={styles.submit} />
+          <Input
+            label="Notes (optional)"
+            placeholder="Add a note..."
+            value={notes}
+            onChangeText={setNotes}
+            multiline
+            style={{ minHeight: 64, textAlignVertical: 'top' }}
+          />
+          <Button label="Save Changes" onPress={handleSubmit} loading={isPending} fullWidth size="lg" style={styles.submit} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

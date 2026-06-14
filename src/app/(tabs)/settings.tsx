@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Alert, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as FileSystem from 'expo-file-system';
@@ -56,19 +57,30 @@ export default function SettingsScreen() {
 
   function handleClearData() {
     haptics.warning();
-    Alert.alert('Clear All Data', 'Permanently delete all expenses, goals, and categories?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Clear Everything',
-        style: 'destructive',
-        onPress: async () => {
-          await storageClear();
-          qc.clear();
-          haptics.success();
-          toast('All data cleared');
+    let deleteInput = '';
+    Alert.prompt(
+      'Clear All Data',
+      'Type DELETE to confirm permanently deleting all expenses, goals, and categories.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear Everything',
+          style: 'destructive',
+          onPress: async (value) => {
+            if ((value ?? '').trim() !== 'DELETE') {
+              haptics.error();
+              toast('Type DELETE exactly to confirm', 'error');
+              return;
+            }
+            await storageClear();
+            qc.clear();
+            haptics.success();
+            toast('All data cleared');
+          },
         },
-      },
-    ]);
+      ],
+      'plain-text'
+    );
   }
 
   return (

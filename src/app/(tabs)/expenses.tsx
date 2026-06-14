@@ -39,19 +39,39 @@ export default function ExpensesScreen() {
   const grouped = groupByDate(filtered);
   const sections = grouped.map(g => ({ title: g.label, data: g.items }));
 
-  function handleDelete(expense: Expense) {
-    haptics.warning();
-    Alert.alert('Delete Expense', `Remove "${expense.description}"?`, [
-      { text: 'Cancel', style: 'cancel' },
+  function handleLongPress(expense: Expense) {
+    haptics.medium();
+    Alert.alert(expense.description, undefined, [
+      {
+        text: 'Edit',
+        onPress: () => router.push({
+          pathname: '/edit-expense',
+          params: {
+            id: expense.id,
+            amount: String(expense.amount),
+            description: expense.description,
+            categoryId: expense.categoryId,
+            date: expense.date,
+            notes: expense.notes ?? '',
+          },
+        }),
+      },
       {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          deleteExpense(expense.id);
-          haptics.success();
-          toast('Expense deleted');
+          haptics.warning();
+          Alert.alert('Delete Expense', `Remove "${expense.description}"?`, [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Delete',
+              style: 'destructive',
+              onPress: () => { deleteExpense(expense.id); haptics.success(); toast('Expense deleted'); },
+            },
+          ]);
         },
       },
+      { text: 'Cancel', style: 'cancel' },
     ]);
   }
 
@@ -118,8 +138,11 @@ export default function ExpensesScreen() {
           renderItem={({ item }) => {
             const cat = categories.find(c => c.id === item.categoryId);
             return (
-              <SwipeableRow onDelete={() => handleDelete(item)}>
-                <View style={[styles.expenseRow, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
+              <SwipeableRow onDelete={() => handleLongPress(item)}>
+                <TouchableOpacity
+                  onLongPress={() => handleLongPress(item)}
+                  activeOpacity={0.85}
+                  style={[styles.expenseRow, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
                   <View style={[styles.iconWrap, { backgroundColor: (cat?.color ?? FALLBACK_CATEGORY_COLOR) + '22' }]}>
                     <Text style={styles.icon}>{cat?.icon ?? '📦'}</Text>
                   </View>
@@ -128,7 +151,7 @@ export default function ExpensesScreen() {
                     <Text style={[styles.meta, { color: theme.textMuted }]}>{cat?.name ?? 'Other'} · {formatDateShort(item.date)}</Text>
                   </View>
                   <Text style={[styles.amount, { color: theme.error }]}>-{formatCurrency(item.amount, symbol)}</Text>
-                </View>
+                </TouchableOpacity>
               </SwipeableRow>
             );
           }}

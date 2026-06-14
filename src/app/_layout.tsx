@@ -31,6 +31,9 @@ export default function RootLayout() {
             <Stack.Screen name="add-goal" options={{ presentation: 'modal', headerShown: false }} />
             <Stack.Screen name="add-deposit" options={{ presentation: 'modal', headerShown: false }} />
             <Stack.Screen name="add-category" options={{ presentation: 'modal', headerShown: false }} />
+            <Stack.Screen name="edit-expense" options={{ presentation: 'modal', headerShown: false }} />
+            <Stack.Screen name="edit-goal" options={{ presentation: 'modal', headerShown: false }} />
+            <Stack.Screen name="edit-category" options={{ presentation: 'modal', headerShown: false }} />
             <Stack.Screen name="auth/sign-in" options={{ presentation: 'modal', headerShown: false }} />
             <Stack.Screen name="auth/sign-up" options={{ presentation: 'modal', headerShown: false }} />
             <Stack.Screen name="auth/forgot-password" options={{ presentation: 'modal', headerShown: false }} />
