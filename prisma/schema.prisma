@@ -14,6 +14,7 @@ model Category {
   icon      String
   color     String
   isDefault Boolean   @default(false)
+  deleted   Boolean   @default(false)
   createdAt DateTime  @default(now())
 
   expenses  Expense[]
@@ -27,6 +28,7 @@ model Expense {
   description String
   date        DateTime
   notes       String?
+  deleted     Boolean   @default(false)
   createdAt   DateTime  @default(now())
 
   categoryId  String
@@ -43,6 +45,7 @@ model SavingsGoal {
   deadline      DateTime?
   icon          String
   color         String
+  deleted       Boolean          @default(false)
   createdAt     DateTime         @default(now())
 
   deposits      SavingsDeposit[]
@@ -55,6 +58,7 @@ model SavingsDeposit {
   amount    Float
   date      DateTime
   notes     String?
+  deleted   Boolean     @default(false)
   createdAt DateTime    @default(now())
 
   goalId    String

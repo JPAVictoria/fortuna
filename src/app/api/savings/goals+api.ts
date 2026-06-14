@@ -3,7 +3,13 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     const data = await prisma.savingsGoal.findMany({
-      include: { deposits: { orderBy: { date: 'desc' } } },
+      where: { deleted: false },
+      include: {
+        deposits: {
+          where: { deleted: false },
+          orderBy: { date: 'desc' },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
     return Response.json({ data });
@@ -17,12 +23,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, targetAmount, icon, color, deadline } = body;
 
-    if (!name?.trim()) {
+    if (!name?.trim())
       return Response.json({ data: null, error: 'Name is required' }, { status: 400 });
-    }
-    if (!targetAmount || targetAmount <= 0) {
+    if (!targetAmount || targetAmount <= 0)
       return Response.json({ data: null, error: 'Invalid target amount' }, { status: 400 });
-    }
 
     const data = await prisma.savingsGoal.create({
       data: {

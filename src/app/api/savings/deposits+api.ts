@@ -5,14 +5,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { goalId, amount, notes } = body;
 
-    if (!goalId) {
+    if (!goalId)
       return Response.json({ data: null, error: 'Goal ID is required' }, { status: 400 });
-    }
-    if (!amount || amount <= 0) {
+    if (!amount || amount <= 0)
       return Response.json({ data: null, error: 'Invalid amount' }, { status: 400 });
-    }
 
-    // Create deposit and update goal's currentAmount in a transaction
     const [deposit] = await prisma.$transaction([
       prisma.savingsDeposit.create({
         data: {

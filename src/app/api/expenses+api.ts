@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     const data = await prisma.expense.findMany({
-      include: { category: true },
+      where: { deleted: false },
+      include: { category: { where: { deleted: false } } },
       orderBy: { date: 'desc' },
     });
     return Response.json({ data });
@@ -17,15 +18,12 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { amount, description, categoryId, date, notes } = body;
 
-    if (!amount || amount <= 0) {
+    if (!amount || amount <= 0)
       return Response.json({ data: null, error: 'Invalid amount' }, { status: 400 });
-    }
-    if (!description?.trim()) {
+    if (!description?.trim())
       return Response.json({ data: null, error: 'Description is required' }, { status: 400 });
-    }
-    if (!categoryId) {
+    if (!categoryId)
       return Response.json({ data: null, error: 'Category is required' }, { status: 400 });
-    }
 
     const data = await prisma.expense.create({
       data: {
