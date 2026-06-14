@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -52,8 +53,8 @@ export default function AddCategoryModal() {
 
         <View style={styles.titleRow}>
           <Text style={[styles.title, { color: theme.text }]}>New Category</Text>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={16}>
-            <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
+          <TouchableOpacity onPress={() => router.back()} hitSlop={16} accessibilityLabel="Close">
+            <Ionicons name="close" size={22} color={theme.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -156,7 +157,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   title: { fontSize: FontSize.xl, fontWeight: '700' },
-  close: { fontSize: FontSize.lg },
   form: {
     paddingHorizontal: Spacing.md,
     gap: Spacing.md,

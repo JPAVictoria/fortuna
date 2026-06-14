@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -80,7 +81,7 @@ export default function EditCategoryModal() {
         <View style={styles.titleRow}>
           <Text style={[styles.title, { color: theme.text }]}>Edit Category</Text>
           <TouchableOpacity onPress={() => { Keyboard.dismiss(); router.back(); }} hitSlop={16} accessibilityLabel="Close">
-            <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
+            <Ionicons name="close" size={22} color={theme.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -164,7 +165,6 @@ const styles = StyleSheet.create({
   handle: { width: 40, height: 4, borderRadius: 2 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: Spacing.md, paddingVertical: Spacing.md },
   title: { fontSize: FontSize.xl, fontWeight: '700' },
-  close: { fontSize: FontSize.lg },
   form: { paddingHorizontal: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxl },
   preview: { borderRadius: BorderRadius.lg, borderWidth: 1.5, padding: Spacing.md, alignItems: 'center', gap: Spacing.xs, flexDirection: 'row', justifyContent: 'center' },
   previewIcon: { fontSize: 28 },

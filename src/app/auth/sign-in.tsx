@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
@@ -105,7 +106,7 @@ export default function SignInScreen() {
               hitSlop={12}
               accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
             >
-              <Text style={[styles.eyeIcon, { color: theme.textMuted }]}>{showPassword ? '🙈' : '👁'}</Text>
+              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={theme.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -157,7 +158,6 @@ const styles = StyleSheet.create({
   sub: { fontSize: FontSize.sm, marginTop: 2 },
   passwordWrap: { position: 'relative' },
   eyeBtn: { position: 'absolute', right: Spacing.md, bottom: 16 },
-  eyeIcon: { fontSize: 18 },
   forgotWrap: { alignSelf: 'flex-end', marginTop: -Spacing.xs },
   forgotLabel: { fontSize: FontSize.sm, fontWeight: '600' },
   errorText: { fontSize: FontSize.sm, textAlign: 'center' },

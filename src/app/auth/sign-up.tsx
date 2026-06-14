@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
@@ -136,7 +137,7 @@ export default function SignUpScreen() {
                 hitSlop={12}
                 accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
               >
-                <Text style={[styles.eyeIcon, { color: theme.textMuted }]}>{showPassword ? '🙈' : '👁'}</Text>
+                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={theme.textMuted} />
               </TouchableOpacity>
             </View>
             {password.length > 0 && (
@@ -172,7 +173,7 @@ export default function SignUpScreen() {
               hitSlop={12}
               accessibilityLabel={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
             >
-              <Text style={[styles.eyeIcon, { color: theme.textMuted }]}>{showConfirm ? '🙈' : '👁'}</Text>
+              <Ionicons name={showConfirm ? 'eye-off-outline' : 'eye-outline'} size={18} color={theme.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -216,7 +217,6 @@ const styles = StyleSheet.create({
   sub: { fontSize: FontSize.sm, marginTop: 2 },
   passwordWrap: { position: 'relative' },
   eyeBtn: { position: 'absolute', right: Spacing.md, bottom: 16 },
-  eyeIcon: { fontSize: 18 },
   strengthRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginTop: 6 },
   strengthBar: { flex: 1, height: 3, borderRadius: 2 },
   strengthLabel: { fontSize: FontSize.xs, fontWeight: '600', width: 40 },
