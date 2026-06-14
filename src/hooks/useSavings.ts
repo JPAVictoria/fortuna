@@ -88,6 +88,49 @@ export function useAddDeposit() {
   });
 }
 
+export function useUpdateSavingsGoal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (updated: Partial<SavingsGoal> & { id: string }) => {
+      const list = await storageGetList<SavingsGoal>(STORAGE_KEYS.SAVINGS_GOALS);
+      await storageSetList(
+        STORAGE_KEYS.SAVINGS_GOALS,
+        list.map((g) => (g.id === updated.id ? { ...g, ...updated } : g))
+      );
+      return updated;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['savings_goals'] }),
+  });
+}
+
+export function useDeleteDeposit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ depositId, goalId, amount }: { depositId: string; goalId: string; amount: number }) => {
+      const [goals, deposits] = await Promise.all([
+        storageGetList<SavingsGoal>(STORAGE_KEYS.SAVINGS_GOALS),
+        storageGetList<SavingsDeposit>(STORAGE_KEYS.SAVINGS_DEPOSITS),
+      ]);
+      await Promise.all([
+        storageSetList(
+          STORAGE_KEYS.SAVINGS_DEPOSITS,
+          deposits.filter((d) => d.id !== depositId)
+        ),
+        storageSetList(
+          STORAGE_KEYS.SAVINGS_GOALS,
+          goals.map((g) =>
+            g.id === goalId ? { ...g, currentAmount: Math.max(0, g.currentAmount - amount) } : g
+          )
+        ),
+      ]);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['savings_goals'] });
+      qc.invalidateQueries({ queryKey: ['savings_deposits'] });
+    },
+  });
+}
+
 export function useDeleteSavingsGoal() {
   const qc = useQueryClient();
   return useMutation({

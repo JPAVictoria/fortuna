@@ -48,6 +48,21 @@ export function useDeleteExpense() {
   });
 }
 
+export function useUpdateExpense() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (updated: Expense) => {
+      const list = await storageGetList<Expense>(STORAGE_KEYS.EXPENSES);
+      await storageSetList(
+        STORAGE_KEYS.EXPENSES,
+        list.map((e) => (e.id === updated.id ? updated : e))
+      );
+      return updated;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['expenses'] }),
+  });
+}
+
 export function useTopCategories(limit = 3) {
   const { data: expenses = [], isLoading } = useCurrentMonthExpenses();
 
@@ -92,6 +107,21 @@ export function useAddCategory() {
       const newItem: Category = { ...category, id: generateId(), isDefault: false };
       await storageSetList(STORAGE_KEYS.CATEGORIES, [...list, newItem]);
       return newItem;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
+  });
+}
+
+export function useUpdateCategory() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (updated: Category) => {
+      const list = await storageGetList<Category>(STORAGE_KEYS.CATEGORIES);
+      await storageSetList(
+        STORAGE_KEYS.CATEGORIES,
+        list.map((c) => (c.id === updated.id ? updated : c))
+      );
+      return updated;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
   });
