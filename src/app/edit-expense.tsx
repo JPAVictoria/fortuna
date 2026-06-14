@@ -1,4 +1,3 @@
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
@@ -19,13 +18,14 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/Button";
+import { DatePickerField } from "@/components/ui/DatePickerField";
 import { Input } from "@/components/ui/Input";
 import { BorderRadius, FontSize, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useCategories, useUpdateExpense } from "@/hooks/useExpenses";
 import { useHaptics } from "@/hooks/useHaptics";
 import { DEFAULT_CURRENCY_SYMBOL } from "@/hooks/useSettings";
-import { formatAmountInput, formatDate } from "@/lib/utils";
+import { formatAmountInput } from "@/lib/utils";
 import { useToast } from "@/providers/ToastProvider";
 
 export default function EditExpenseModal() {
@@ -54,7 +54,6 @@ export default function EditExpenseModal() {
     params.categoryId ?? "",
   );
   const [date, setDate] = useState(new Date(params.date ?? Date.now()));
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [photoUri, setPhotoUri] = useState<string | undefined>(params.photoUri || undefined);
 
   async function pickPhoto(useCamera: boolean) {
@@ -225,39 +224,10 @@ export default function EditExpenseModal() {
               </ScrollView>
             </View>
 
-            <View style={styles.field}>
-              <Text style={[styles.label, { color: theme.textSecondary }]}>
-                DATE
-              </Text>
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                accessibilityLabel={`Date: ${formatDate(date.toISOString())}`}
-                style={[
-                  styles.dateRow,
-                  {
-                    backgroundColor: theme.backgroundElement,
-                    borderColor: theme.border,
-                  },
-                ]}
-              >
-                <Ionicons name="calendar-outline" size={16} color={theme.textMuted} />
-                <Text style={[styles.dateValue, { color: theme.text }]}>
-                  {formatDate(date.toISOString())}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={date}
-                mode="date"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
-                onChange={(_, d) => {
-                  setShowDatePicker(Platform.OS === "ios");
-                  if (d) setDate(d);
-                }}
-              />
-            )}
+            <DatePickerField
+              value={date}
+              onChange={setDate}
+            />
 
             <Input
               label="Notes (optional)"
@@ -336,15 +306,6 @@ const styles = StyleSheet.create({
   },
   chipIcon: { fontSize: 14 },
   chipLabel: { fontSize: FontSize.sm, fontWeight: "500" },
-  dateRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1.5,
-  },
-  dateValue: { fontSize: FontSize.md, fontWeight: "500", flex: 1 },
   photoBtn: { flexDirection: "row", alignItems: "center", gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.md, borderWidth: 1.5, borderStyle: "dashed" },
   photoBtnLabel: { fontSize: FontSize.sm },
   photoPreviewWrap: { position: "relative" },

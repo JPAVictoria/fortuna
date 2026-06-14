@@ -149,9 +149,9 @@ export default function DashboardScreen() {
 
         {/* Net balance (only when income recorded) */}
         {netBalance !== null && (
-          <View style={[styles.netCard, { backgroundColor: netBalance >= 0 ? theme.primaryDim : theme.errorDim, borderColor: netBalance >= 0 ? theme.primary + '44' : theme.error + '44' }]}>
+          <View style={[styles.netCard, { backgroundColor: netBalance >= 0 ? theme.primaryDim : theme.goldDim, borderColor: netBalance >= 0 ? theme.primary + '44' : theme.gold + '44' }]}>
             <Text style={[styles.netLabel, { color: theme.textSecondary }]}>NET THIS MONTH</Text>
-            <Text style={[styles.netAmt, { color: netBalance >= 0 ? theme.primary : theme.error }]}>
+            <Text style={[styles.netAmt, { color: netBalance >= 0 ? theme.primary : theme.gold }]}>
               {netBalance >= 0 ? '+' : ''}{formatCurrency(netBalance, symbol)}
             </Text>
             <Text style={[styles.netSub, { color: theme.textMuted }]}>
@@ -261,9 +261,9 @@ const styles = StyleSheet.create({
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   quickAdd: { paddingHorizontal: Spacing.md, paddingVertical: 8, borderRadius: BorderRadius.full, borderWidth: 1 },
   quickAddLabel: { fontSize: FontSize.sm, fontWeight: '700' },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.lg, borderWidth: 1, minWidth: '30%', flex: 1 },
-  actionLabel: { fontSize: FontSize.sm, fontWeight: '600' },
+  actions: { flexDirection: 'row', gap: Spacing.sm },
+  actionBtn: { flexDirection: 'column', alignItems: 'center', gap: 4, paddingVertical: 10, paddingHorizontal: 4, borderRadius: BorderRadius.lg, borderWidth: 1, flex: 1 },
+  actionLabel: { fontSize: FontSize.xs, fontWeight: '600', textAlign: 'center' },
   netCard: { borderRadius: BorderRadius.lg, borderWidth: 1, padding: Spacing.md, gap: 2 },
   netLabel: { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 0.8 },
   netAmt: { fontSize: FontSize.xxl, fontWeight: '700' },

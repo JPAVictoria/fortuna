@@ -56,7 +56,7 @@ export function ExpenseItem({ expense, category, currencySymbol = DEFAULT_CURREN
           </Text>
         </View>
       </View>
-      <Text style={[styles.amount, { color: theme.error }]}>
+      <Text style={[styles.amount, { color: theme.textSecondary }]}>
         -{formatCurrency(expense.amount, currencySymbol)}
       </Text>
     </TouchableOpacity>

@@ -1,4 +1,5 @@
 import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 
@@ -93,7 +94,7 @@ export function SavingsGoalCard({ goal, onDeposit, currencySymbol = DEFAULT_CURR
         styles.card,
         {
           backgroundColor: theme.surface,
-          borderColor: isComplete ? goal.color + '66' : theme.border,
+          borderColor: isComplete ? theme.primary + '66' : theme.border,
           borderWidth: isComplete ? 1.5 : 1,
         },
       ]}>
@@ -111,8 +112,8 @@ export function SavingsGoalCard({ goal, onDeposit, currencySymbol = DEFAULT_CURR
         </View>
         <Text style={[styles.expandChevron, { color: theme.textMuted }]}>{expanded ? '▲' : '▼'}</Text>
         {isComplete && (
-          <Animated.View style={[styles.trophyBadge, { backgroundColor: goal.color + '22', transform: [{ scale: trophyScale }], opacity: trophyOpacity }]}>
-            <Text style={styles.trophyIcon}>🏆</Text>
+          <Animated.View style={[styles.completeBadge, { backgroundColor: theme.primaryDim, transform: [{ scale: trophyScale }], opacity: trophyOpacity }]}>
+            <Ionicons name="checkmark-circle" size={20} color={theme.primary} />
           </Animated.View>
         )}
       </View>
@@ -189,8 +190,7 @@ const styles = StyleSheet.create({
   name: { fontSize: FontSize.lg, fontWeight: '600' },
   deadline: { fontSize: FontSize.sm, marginTop: 1 },
   expandChevron: { fontSize: FontSize.xs },
-  trophyBadge: { borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, alignItems: 'center', justifyContent: 'center' },
-  trophyIcon: { fontSize: 18 },
+  completeBadge: { borderRadius: 8, padding: 4, alignItems: 'center', justifyContent: 'center' },
   amounts: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.xs },
   current: { fontSize: FontSize.xl, fontWeight: '700' },
   target: { fontSize: FontSize.md },

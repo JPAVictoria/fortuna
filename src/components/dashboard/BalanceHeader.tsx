@@ -57,7 +57,7 @@ export function BalanceHeader({
             style={[
               styles.stat,
               {
-                backgroundColor: remaining < 0 ? theme.errorDim : theme.primaryDim,
+                backgroundColor: remaining < 0 ? theme.goldDim : theme.primaryDim,
                 borderRadius: BorderRadius.md,
               },
             ]}>
@@ -67,7 +67,7 @@ export function BalanceHeader({
             <Text
               style={[
                 styles.statValue,
-                { color: remaining < 0 ? theme.error : theme.primaryLight },
+                { color: remaining < 0 ? theme.gold : theme.primaryLight },
               ]}>
               {formatCurrency(Math.abs(remaining), currencySymbol)}
             </Text>

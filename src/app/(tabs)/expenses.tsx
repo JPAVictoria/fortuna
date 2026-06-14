@@ -111,30 +111,49 @@ export default function ExpensesScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top']}>
-      {/* Header with month selector */}
+      {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
-        <Text style={[styles.title, { color: theme.text }]}>Expenses</Text>
-        <View style={styles.monthSelector}>
-          {!selectMode && (
-            <TouchableOpacity onPress={() => setSelectMode(true)} hitSlop={12} accessibilityLabel="Select expenses" style={styles.selectBtn}>
-              <Text style={[styles.selectBtnLabel, { color: theme.primary }]}>Select</Text>
+        {/* Title row */}
+        <View style={styles.titleRow}>
+          <Text style={[styles.title, { color: theme.text }]}>Expenses</Text>
+          {!selectMode ? (
+            <TouchableOpacity
+              onPress={() => setSelectMode(true)}
+              hitSlop={12}
+              accessibilityLabel="Select expenses"
+              style={[styles.selectChip, { borderColor: theme.primary + '55', backgroundColor: theme.primaryDim }]}>
+              <Ionicons name="checkmark-circle-outline" size={13} color={theme.primary} />
+              <Text style={[styles.selectChipLabel, { color: theme.primary }]}>Select</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => { setSelectMode(false); setSelectedIds(new Set()); }}
+              hitSlop={12}
+              accessibilityLabel="Cancel selection"
+              style={[styles.selectChip, { borderColor: theme.border, backgroundColor: theme.backgroundElement }]}>
+              <Ionicons name="close" size={13} color={theme.textMuted} />
+              <Text style={[styles.selectChipLabel, { color: theme.textMuted }]}>Cancel</Text>
             </TouchableOpacity>
           )}
-          {selectMode && (
-            <TouchableOpacity onPress={() => { setSelectMode(false); setSelectedIds(new Set()); }} hitSlop={12} accessibilityLabel="Cancel selection">
-              <Text style={[styles.selectBtnLabel, { color: theme.error }]}>Cancel</Text>
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity onPress={() => setMonthOffset(o => o - 1)} hitSlop={12} accessibilityLabel="Previous month">
-            <Text style={[styles.arrow, { color: theme.primary }]}>‹</Text>
+        </View>
+
+        {/* Month navigation */}
+        <View style={[styles.monthNav, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+          <TouchableOpacity
+            onPress={() => setMonthOffset(o => o - 1)}
+            hitSlop={12}
+            accessibilityLabel="Previous month"
+            style={styles.monthArrow}>
+            <Ionicons name="chevron-back" size={16} color={theme.primary} />
           </TouchableOpacity>
           <Text style={[styles.monthLabel, { color: theme.text }]}>{formatMonthKey(monthKey)}</Text>
           <TouchableOpacity
             onPress={() => setMonthOffset(o => Math.min(0, o + 1))}
             hitSlop={12}
             disabled={monthOffset === 0}
-            accessibilityLabel="Next month">
-            <Text style={[styles.arrow, { color: monthOffset === 0 ? theme.border : theme.primary }]}>›</Text>
+            accessibilityLabel="Next month"
+            style={[styles.monthArrow, { opacity: monthOffset === 0 ? 0.3 : 1 }]}>
+            <Ionicons name="chevron-forward" size={16} color={theme.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -170,7 +189,7 @@ export default function ExpensesScreen() {
               {/* Total card */}
               <View style={[styles.totalCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
                 <Text style={[styles.totalLabel, { color: theme.textSecondary }]}>TOTAL SPENT</Text>
-                <Text style={[styles.totalAmount, { color: theme.error }]}>{formatCurrency(total, symbol)}</Text>
+                <Text style={[styles.totalAmount, { color: theme.text }]}>{formatCurrency(total, symbol)}</Text>
                 <Text style={[styles.totalCount, { color: theme.textMuted }]}>
                   {filtered.length} transaction{filtered.length !== 1 ? 's' : ''}
                 </Text>
@@ -275,7 +294,7 @@ export default function ExpensesScreen() {
                     {item.photoUri ? <Ionicons name="image-outline" size={12} color={theme.textMuted} /> : null}
                   </View>
                 </View>
-                <Text style={[styles.amount, { color: theme.error }]}>-{formatCurrency(item.amount, symbol)}</Text>
+                <Text style={[styles.amount, { color: theme.textSecondary }]}>-{formatCurrency(item.amount, symbol)}</Text>
               </TouchableOpacity>
             );
             return selectMode ? row : <SwipeableRow onDelete={() => deleteWithUndo(item)}>{row}</SwipeableRow>;
@@ -321,11 +340,14 @@ export default function ExpensesScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  header: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm, paddingTop: Spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth },
+  header: { paddingHorizontal: Spacing.md, paddingTop: Spacing.sm, paddingBottom: Spacing.md, gap: Spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { fontSize: FontSize.xxl, fontWeight: '700' },
-  monthSelector: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: 4 },
-  arrow: { fontSize: 22, fontWeight: '700', lineHeight: 26 },
-  monthLabel: { fontSize: FontSize.sm, fontWeight: '600', flex: 1, textAlign: 'center' },
+  selectChip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: BorderRadius.full, borderWidth: 1 },
+  selectChipLabel: { fontSize: FontSize.xs, fontWeight: '700' },
+  monthNav: { flexDirection: 'row', alignItems: 'center', borderRadius: BorderRadius.lg, borderWidth: 1, overflow: 'hidden' },
+  monthArrow: { width: 40, height: 38, alignItems: 'center', justifyContent: 'center' },
+  monthLabel: { flex: 1, textAlign: 'center', fontSize: FontSize.sm, fontWeight: '700', letterSpacing: 0.3 },
   searchRow: { flexDirection: 'row', alignItems: 'center', marginHorizontal: Spacing.md, marginTop: Spacing.sm, borderRadius: BorderRadius.md, borderWidth: 1, paddingHorizontal: Spacing.md, height: 44 },
   searchIcon: { fontSize: 14, marginRight: 6 },
   searchInput: { flex: 1, fontSize: FontSize.md },
@@ -342,8 +364,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: FontSize.sm, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
   sectionSubtotal: { fontSize: FontSize.sm, fontWeight: '600' },
   listContent: { paddingBottom: 120 },
-  selectBtn: { paddingHorizontal: 8, paddingVertical: 2 },
-  selectBtnLabel: { fontSize: FontSize.sm, fontWeight: '600' },
+
   budgetCard: { marginHorizontal: Spacing.md, marginBottom: Spacing.xs, padding: Spacing.md, borderRadius: BorderRadius.lg, borderWidth: 1, gap: Spacing.xs },
   budgetInfo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   budgetLabel: { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 0.8 },

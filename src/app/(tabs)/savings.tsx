@@ -36,7 +36,7 @@ export default function SavingsScreen() {
     const newlyDone = [...nowComplete].filter(id => !prevCompletedIds.current.has(id));
     if (newlyDone.length > 0) {
       haptics.success();
-      toast('Goal complete! 🏆');
+      toast('Goal reached!');
       setShowConfetti(true);
     }
     prevCompletedIds.current = nowComplete;
@@ -55,7 +55,7 @@ export default function SavingsScreen() {
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={theme.gold} />}>
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={theme.primary} />}>
 
         <View style={styles.header}>
           <Text style={[styles.title, { color: theme.text }]}>Savings</Text>
@@ -63,9 +63,9 @@ export default function SavingsScreen() {
         </View>
 
         {/* Total saved hero */}
-        <View style={[styles.hero, { backgroundColor: theme.surface, borderColor: theme.gold + '44' }]}>
-          <View style={[styles.goldBar, { backgroundColor: theme.gold }]} />
-          <Text style={[styles.heroLabel, { color: theme.gold }]}>TOTAL SAVED</Text>
+        <View style={[styles.hero, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={[styles.primaryBar, { backgroundColor: theme.primary }]} />
+          <Text style={[styles.heroLabel, { color: theme.textSecondary }]}>TOTAL SAVED</Text>
           <Text style={[styles.heroAmount, { color: theme.text }]}>{formatCurrency(total, symbol)}</Text>
           {totalTarget > 0 && (
             <Text style={[styles.heroBreakdown, { color: theme.textSecondary }]}>
@@ -101,7 +101,7 @@ export default function SavingsScreen() {
 
             {completed.length > 0 && (
               <View style={styles.section}>
-                <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>COMPLETED 🏆</Text>
+                <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>COMPLETED</Text>
                 {completed.map(goal => (
                   <SavingsGoalCard key={goal.id} goal={goal} onDeposit={handleDeposit} currencySymbol={symbol} />
                 ))}
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   title: { fontSize: FontSize.xxl, fontWeight: '700' },
   subtitle: { fontSize: FontSize.sm },
   hero: { borderRadius: BorderRadius.xl, borderWidth: 1.5, padding: Spacing.lg, gap: 4, overflow: 'hidden' },
-  goldBar: { position: 'absolute', top: 0, left: 0, right: 0, height: 3 },
+  primaryBar: { position: 'absolute', top: 0, left: 0, right: 0, height: 3 },
   heroLabel: { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 1 },
   heroAmount: { fontSize: FontSize.display, fontWeight: '700', letterSpacing: -1, lineHeight: 50 },
   heroBreakdown: { fontSize: FontSize.sm, fontWeight: '500' },

@@ -1,4 +1,3 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
@@ -7,6 +6,7 @@ import { Alert, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Sty
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
+import { DatePickerField } from '@/components/ui/DatePickerField';
 import { Input } from '@/components/ui/Input';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -14,7 +14,7 @@ import { useAddExpense, useCategories } from '@/hooks/useExpenses';
 import { useHaptics } from '@/hooks/useHaptics';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
-import { formatAmountInput, formatDate, todayISO } from '@/lib/utils';
+import { formatAmountInput, todayISO } from '@/lib/utils';
 
 export default function AddExpenseModal() {
   const theme = useTheme();
@@ -28,7 +28,6 @@ export default function AddExpenseModal() {
   const [notes, setNotes] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [date, setDate] = useState(new Date(todayISO()));
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [photoUri, setPhotoUri] = useState<string | undefined>();
 
   async function pickPhoto(useCamera: boolean) {
@@ -119,29 +118,11 @@ export default function AddExpenseModal() {
             </ScrollView>
           </View>
 
-          <View style={styles.field}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>DATE</Text>
-            <TouchableOpacity
-              onPress={() => setShowDatePicker(true)}
-              accessibilityLabel={`Date: ${formatDate(date.toISOString())}`}
-              style={[styles.dateRow, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
-              <Ionicons name="calendar-outline" size={16} color={theme.textMuted} />
-              <Text style={[styles.dateValue, { color: theme.text }]}>{formatDate(date.toISOString())}</Text>
-            </TouchableOpacity>
-          </View>
-
-          {showDatePicker && (
-            <DateTimePicker
-              value={date}
-              mode="date"
-              maximumDate={new Date(todayISO())}
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={(_, d) => {
-                setShowDatePicker(Platform.OS === 'ios');
-                if (d) setDate(d);
-              }}
-            />
-          )}
+          <DatePickerField
+            value={date}
+            onChange={setDate}
+            maximumDate={new Date(todayISO())}
+          />
 
           <Input label="Notes (optional)" placeholder="Add a note..." value={notes} onChangeText={setNotes} multiline style={{ minHeight: 64, textAlignVertical: 'top' }} />
 
@@ -184,8 +165,6 @@ const styles = StyleSheet.create({
   chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: BorderRadius.full },
   chipIcon: { fontSize: 14 },
   chipLabel: { fontSize: FontSize.sm, fontWeight: '500' },
-  dateRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.md, borderWidth: 1.5 },
-  dateValue: { fontSize: FontSize.md, fontWeight: '500', flex: 1 },
   photoSection: { gap: Spacing.xs },
   photoBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.md, borderWidth: 1.5, borderStyle: 'dashed' },
   photoBtnLabel: { fontSize: FontSize.sm },

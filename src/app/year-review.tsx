@@ -61,7 +61,7 @@ export default function YearReviewScreen() {
         <View style={styles.heroGrid}>
           <View style={[styles.heroCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <Text style={[styles.heroLabel, { color: theme.textSecondary }]}>TOTAL SPENT</Text>
-            <Text style={[styles.heroAmt, { color: theme.error }]}>{formatCurrency(yearTotal, symbol)}</Text>
+            <Text style={[styles.heroAmt, { color: theme.text }]}>{formatCurrency(yearTotal, symbol)}</Text>
           </View>
           <View style={[styles.heroCard, { backgroundColor: theme.surface, borderColor: theme.goldDim }]}>
             <Text style={[styles.heroLabel, { color: theme.gold }]}>TOTAL SAVED</Text>
@@ -84,7 +84,7 @@ export default function YearReviewScreen() {
             {monthlyTotals.map(m => (
               <View key={m.key} style={styles.monthBar}>
                 <View style={styles.barTrack}>
-                  <View style={[styles.barFill, { height: `${(m.total / maxMonth) * 100}%`, backgroundColor: m.total === worstMonth.total && m.total > 0 ? theme.error : m.total === bestMonth.total && m.total > 0 ? theme.primary : theme.primaryLight }]} />
+                  <View style={[styles.barFill, { height: `${(m.total / maxMonth) * 100}%`, backgroundColor: m.total === worstMonth.total && m.total > 0 ? theme.gold : m.total === bestMonth.total && m.total > 0 ? theme.primary : theme.primaryLight }]} />
                 </View>
                 <Text style={[styles.barLabel, { color: theme.textMuted }]}>{m.label}</Text>
               </View>
@@ -115,11 +115,11 @@ export default function YearReviewScreen() {
               </View>
             )}
             {worstMonth.total > 0 && (
-              <View style={[styles.highlight, { backgroundColor: theme.errorDim, borderColor: theme.error + '44' }]}>
+              <View style={[styles.highlight, { backgroundColor: theme.goldDim, borderColor: theme.gold + '44' }]}>
                 <Text style={styles.highlightIcon}>📈</Text>
                 <View style={styles.highlightInfo}>
                   <Text style={[styles.highlightTitle, { color: theme.text }]}>Highest Spending</Text>
-                  <Text style={[styles.highlightValue, { color: theme.error }]}>{worstMonth.label} · {formatCurrency(worstMonth.total, symbol)}</Text>
+                  <Text style={[styles.highlightValue, { color: theme.gold }]}>{worstMonth.label} · {formatCurrency(worstMonth.total, symbol)}</Text>
                 </View>
               </View>
             )}

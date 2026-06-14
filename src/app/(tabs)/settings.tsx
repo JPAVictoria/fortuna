@@ -165,28 +165,6 @@ export default function SettingsScreen() {
           </Card>
         </View>
 
-        {/* Personalization */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>PERSONALIZATION</Text>
-          <Card padded>
-            <Text style={[styles.accentLabel, { color: theme.text }]}>Accent Color</Text>
-            <View style={styles.accentRow}>
-              {['#059669', '#0D9488', '#2563EB', '#7C3AED', '#DB2777', '#EA580C', '#D97706'].map(color => {
-                const active = (settings?.accentColor ?? '#059669') === color;
-                return (
-                  <TouchableOpacity
-                    key={color}
-                    onPress={() => { haptics.light(); updateSettings({ accentColor: color }); }}
-                    accessibilityLabel={`Set accent color ${color}`}
-                    style={[styles.accentSwatch, { backgroundColor: color }, active && styles.accentSwatchActive]}>
-                    {active && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </Card>
-        </View>
-
         {/* Categories */}
         <View style={styles.section}>
           <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>CATEGORIES</Text>
@@ -286,8 +264,4 @@ const styles = StyleSheet.create({
   dataLabel: { fontSize: FontSize.md, fontWeight: '600' },
   dataDesc: { fontSize: FontSize.sm },
   tagline: { fontSize: FontSize.xs, textAlign: 'center', paddingVertical: Spacing.lg, fontStyle: 'italic' },
-  accentLabel: { fontSize: FontSize.sm, fontWeight: '600', marginBottom: Spacing.sm },
-  accentRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
-  accentSwatch: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  accentSwatchActive: { borderWidth: 2.5, borderColor: '#FFFFFF' },
 });

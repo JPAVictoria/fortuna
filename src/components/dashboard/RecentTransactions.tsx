@@ -45,7 +45,7 @@ export function RecentTransactions({
                 {cat?.name ?? 'Other'} · {formatDateShort(expense.date)}
               </Text>
             </View>
-            <Text style={[styles.amount, { color: theme.error }]}>
+            <Text style={[styles.amount, { color: theme.textSecondary }]}>
               -{formatCurrency(expense.amount, currencySymbol)}
             </Text>
           </View>

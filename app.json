@@ -8,7 +8,8 @@
     "scheme": "fortuna",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.fortuna"
     },
     "android": {
       "adaptiveIcon": {
