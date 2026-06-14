@@ -228,6 +228,20 @@ export default function SettingsScreen() {
           </Card>
         </View>
 
+        {/* Year in Review */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>INSIGHTS</Text>
+          <Card padded={false}>
+            <TouchableOpacity
+              style={styles.row}
+              onPress={() => router.push('/year-review')}
+              accessibilityLabel="View year in review">
+              <Text style={[styles.rowLabel, { color: theme.text }]}>Year in Review</Text>
+              <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+            </TouchableOpacity>
+          </Card>
+        </View>
+
         {/* About */}
         <View style={styles.section}>
           <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>ABOUT</Text>
