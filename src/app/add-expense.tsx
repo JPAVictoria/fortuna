@@ -9,14 +9,13 @@ import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAddExpense, useCategories } from '@/hooks/useExpenses';
 import { useHaptics } from '@/hooks/useHaptics';
-import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
+import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
 import { todayISO } from '@/lib/utils';
 
 export default function AddExpenseModal() {
   const theme = useTheme();
   const { data: categories = [] } = useCategories();
-  const { data: settings } = useSettings();
   const { mutate: addExpense, isPending } = useAddExpense();
   const haptics = useHaptics();
   const toast = useToast();
@@ -25,8 +24,6 @@ export default function AddExpenseModal() {
   const [description, setDescription] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
-
-  const symbol = settings?.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
 
   function handleSubmit() {
     const parsed = parseFloat(amount.replace(/,/g, ''));
@@ -75,7 +72,7 @@ export default function AddExpenseModal() {
         </View>
 
         <ScrollView contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
-          <Input label="Amount" prefix={symbol} placeholder="0.00" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" returnKeyType="next" autoFocus />
+          <Input label="Amount" prefix={DEFAULT_CURRENCY_SYMBOL} placeholder="0.00" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" returnKeyType="next" autoFocus />
           <Input label="Description" placeholder="What did you spend on?" value={description} onChangeText={setDescription} returnKeyType="next" />
 
           <View style={styles.field}>

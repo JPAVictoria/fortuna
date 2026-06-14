@@ -11,14 +11,13 @@ import { FALLBACK_CATEGORY_COLOR } from '@/constants/categories';
 import { useTheme } from '@/hooks/use-theme';
 import { useCategories, useCurrentMonthExpenses, useDeleteExpense } from '@/hooks/useExpenses';
 import { useHaptics } from '@/hooks/useHaptics';
-import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
+import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
 import { formatCurrency, formatDateShort, formatMonth, groupByDate, todayISO } from '@/lib/utils';
 import { Category, Expense } from '@/types';
 
 export default function ExpensesScreen() {
   const theme = useTheme();
-  const { data: settings } = useSettings();
   const { data: expenses = [], isLoading, refetch } = useCurrentMonthExpenses();
   const { data: categories = [] } = useCategories();
   const { mutate: deleteExpense } = useDeleteExpense();
@@ -28,7 +27,7 @@ export default function ExpensesScreen() {
   const [search, setSearch] = useState('');
   const [filterCategoryId, setFilterCategoryId] = useState<string>('');
 
-  const symbol = settings?.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
+  const symbol = DEFAULT_CURRENCY_SYMBOL;
 
   const filtered = expenses.filter(e => {
     const matchSearch = !search || e.description.toLowerCase().includes(search.toLowerCase());

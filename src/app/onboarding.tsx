@@ -6,18 +6,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FortunaLogo } from '@/components/ui/FortunaLogo';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
+import { FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useUpdateSettings } from '@/hooks/useSettings';
 import { useAddSavingsGoal } from '@/hooks/useSavings';
-
-const CURRENCIES = [
-  { label: '₱ PHP', currency: 'PHP', symbol: '₱' },
-  { label: '$ USD', currency: 'USD', symbol: '$' },
-  { label: '€ EUR', currency: 'EUR', symbol: '€' },
-  { label: 'S$ SGD', currency: 'SGD', symbol: 'S$' },
-];
 
 const STEPS = ['welcome', 'profile', 'goal'] as const;
 type Step = typeof STEPS[number];
@@ -30,7 +23,6 @@ export default function OnboardingScreen() {
 
   const [step, setStep] = useState<Step>('welcome');
   const [name, setName] = useState('');
-  const [currency, setCurrency] = useState({ label: '₱ PHP', currency: 'PHP', symbol: '₱' });
   const [goalName, setGoalName] = useState('');
   const [goalAmount, setGoalAmount] = useState('');
 
@@ -42,7 +34,7 @@ export default function OnboardingScreen() {
 
   function finish() {
     haptics.success();
-    updateSettings({ userName: name.trim() || 'You', currency: currency.currency, currencySymbol: currency.symbol });
+    updateSettings({ userName: name.trim() || 'You' });
 
     if (goalName.trim() && parseFloat(goalAmount) > 0) {
       addGoal({ name: goalName.trim(), targetAmount: parseFloat(goalAmount), icon: '🏆', color: '#F59E0B' });
@@ -93,27 +85,8 @@ export default function OnboardingScreen() {
               value={name}
               onChangeText={setName}
               autoFocus
-              returnKeyType="next"
+              returnKeyType="done"
             />
-            <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>CURRENCY</Text>
-            <View style={styles.currencyGrid}>
-              {CURRENCIES.map(c => (
-                <TouchableOpacity
-                  key={c.currency}
-                  onPress={() => { haptics.light(); setCurrency(c); }}
-                  style={[
-                    styles.currencyChip,
-                    {
-                      backgroundColor: currency.currency === c.currency ? theme.primaryDim : theme.surface,
-                      borderColor: currency.currency === c.currency ? theme.primary : theme.border,
-                    },
-                  ]}>
-                  <Text style={[styles.currencyLabel, { color: currency.currency === c.currency ? theme.primary : theme.textMuted }]}>
-                    {c.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
             <Button label="Continue →" onPress={next} fullWidth size="lg" style={styles.btn} />
           </View>
         )}
@@ -127,8 +100,8 @@ export default function OnboardingScreen() {
             </Text>
             <Input label="Goal Name" placeholder="e.g. Emergency Fund, New Phone..." value={goalName} onChangeText={setGoalName} />
             <Input
-              label={`Target Amount (${currency.symbol})`}
-              prefix={currency.symbol}
+              label="Target Amount (₱)"
+              prefix="₱"
               placeholder="0.00"
               value={goalAmount}
               onChangeText={setGoalAmount}
@@ -164,14 +137,6 @@ const styles = StyleSheet.create({
   sub: { fontSize: FontSize.md, lineHeight: 24 },
   latin: { fontSize: FontSize.sm, fontStyle: 'italic' },
   sectionLabel: { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 0.8, marginTop: Spacing.xs },
-  currencyGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  currencyChip: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 10,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1.5,
-  },
-  currencyLabel: { fontSize: FontSize.sm, fontWeight: '600' },
   btn: { marginTop: Spacing.sm },
   skip: { alignItems: 'center', paddingVertical: Spacing.sm },
   skipLabel: { fontSize: FontSize.sm },

@@ -6,7 +6,7 @@ export async function GET() {
 
     if (!data) {
       data = await prisma.appSettings.create({
-        data: { userName: 'You', currency: 'PHP', currencySymbol: '₱' },
+        data: { userName: 'You' },
       });
     }
 
@@ -19,7 +19,7 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { userName, currency, currencySymbol, monthlyBudget } = body;
+    const { userName, monthlyBudget } = body;
 
     let settings = await prisma.appSettings.findFirst();
 
@@ -28,16 +28,12 @@ export async function PUT(request: Request) {
           where: { id: settings.id },
           data: {
             ...(userName !== undefined && { userName }),
-            ...(currency !== undefined && { currency }),
-            ...(currencySymbol !== undefined && { currencySymbol }),
             ...(monthlyBudget !== undefined && { monthlyBudget }),
           },
         })
       : await prisma.appSettings.create({
           data: {
             userName: userName ?? 'You',
-            currency: currency ?? 'PHP',
-            currencySymbol: currencySymbol ?? '₱',
             monthlyBudget: monthlyBudget ?? null,
           },
         });

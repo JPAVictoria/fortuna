@@ -16,18 +16,15 @@ import { Input } from '@/components/ui/Input';
 import { FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAddDeposit } from '@/hooks/useSavings';
-import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
+import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 
 export default function AddDepositModal() {
   const theme = useTheme();
   const { goalId, goalName } = useLocalSearchParams<{ goalId: string; goalName: string }>();
   const { mutate: addDeposit, isPending } = useAddDeposit();
-  const { data: settings } = useSettings();
 
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
-
-  const symbol = settings?.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
 
   function handleSubmit() {
     const parsed = parseFloat(amount.replace(/,/g, ''));
@@ -68,7 +65,7 @@ export default function AddDepositModal() {
         <View style={styles.form}>
           <Input
             label="Amount"
-            prefix={symbol}
+            prefix={DEFAULT_CURRENCY_SYMBOL}
             placeholder="0.00"
             value={amount}
             onChangeText={setAmount}

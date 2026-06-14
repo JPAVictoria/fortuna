@@ -11,7 +11,7 @@ import { CATEGORY_COLOR_SWATCHES } from '@/constants/categories';
 import { useTheme } from '@/hooks/use-theme';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useAddSavingsGoal } from '@/hooks/useSavings';
-import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
+import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
 import { formatDate } from '@/lib/utils';
 
@@ -20,7 +20,6 @@ const GOAL_ICONS = ['🏠', '✈️', '🚗', '💻', '📱', '🎓', '💍', '�
 export default function AddGoalModal() {
   const theme = useTheme();
   const { mutate: addGoal, isPending } = useAddSavingsGoal();
-  const { data: settings } = useSettings();
   const haptics = useHaptics();
   const toast = useToast();
 
@@ -30,8 +29,6 @@ export default function AddGoalModal() {
   const [selectedColor, setSelectedColor] = useState(CATEGORY_COLOR_SWATCHES[7]);
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
-
-  const symbol = settings?.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
 
   function handleSubmit() {
     const parsed = parseFloat(targetAmount.replace(/,/g, ''));
@@ -60,7 +57,7 @@ export default function AddGoalModal() {
 
         <ScrollView contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
           <Input label="Goal Name" placeholder="e.g. Emergency Fund, New Laptop..." value={name} onChangeText={setName} returnKeyType="next" />
-          <Input label="Target Amount" prefix={symbol} placeholder="0.00" value={targetAmount} onChangeText={setTargetAmount} keyboardType="decimal-pad" returnKeyType="done" />
+          <Input label="Target Amount" prefix={DEFAULT_CURRENCY_SYMBOL} placeholder="0.00" value={targetAmount} onChangeText={setTargetAmount} keyboardType="decimal-pad" returnKeyType="done" />
 
           {/* Icon picker */}
           <View style={styles.field}>
@@ -123,7 +120,7 @@ export default function AddGoalModal() {
           <View style={[styles.preview, { backgroundColor: selectedColor + '22', borderColor: selectedColor + '55' }]}>
             <Text style={styles.previewIcon}>{selectedIcon}</Text>
             <Text style={[styles.previewName, { color: selectedColor }]}>{name || 'Your Goal'}</Text>
-            <Text style={[styles.previewAmount, { color: theme.textMuted }]}>Target: {symbol}{targetAmount || '0.00'}</Text>
+            <Text style={[styles.previewAmount, { color: theme.textMuted }]}>Target: {DEFAULT_CURRENCY_SYMBOL}{targetAmount || '0.00'}</Text>
           </View>
 
           <Button label="Create Goal" onPress={handleSubmit} loading={isPending} fullWidth size="lg" style={styles.submit} />

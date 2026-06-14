@@ -36,7 +36,5 @@ export type SavingsDeposit = {
 
 export type AppSettings = {
   userName: string;
-  currency: string;
-  currencySymbol: string;
   monthlyBudget?: number;
 };

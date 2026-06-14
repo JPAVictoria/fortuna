@@ -7,8 +7,6 @@ export const DEFAULT_CURRENCY_SYMBOL = '₱';
 
 const DEFAULT_SETTINGS: AppSettings = {
   userName: 'You',
-  currency: 'PHP',
-  currencySymbol: DEFAULT_CURRENCY_SYMBOL,
 };
 
 export function useSettings() {

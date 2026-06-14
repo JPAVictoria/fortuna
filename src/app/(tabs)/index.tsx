@@ -30,7 +30,7 @@ export default function DashboardScreen() {
   const { total: totalSaved } = useTotalSaved();
   const fortuneScore = useFortuneScore();
 
-  const symbol = settings?.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
+  const symbol = DEFAULT_CURRENCY_SYMBOL;
   const name = settings?.userName ?? 'You';
   const budget = settings?.monthlyBudget;
   const recentFive = monthExpenses.slice(0, 5);

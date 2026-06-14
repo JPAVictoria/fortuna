@@ -68,13 +68,11 @@ model SavingsDeposit {
 }
 
 model AppSettings {
-  id             String   @id @default(cuid())
-  userName       String   @default("You")
-  currency       String   @default("PHP")
-  currencySymbol String   @default("₱")
-  monthlyBudget  Float?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  userName      String   @default("You")
+  monthlyBudget Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("app_settings")
 }

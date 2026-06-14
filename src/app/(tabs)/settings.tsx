@@ -20,13 +20,6 @@ import { useToast } from '@/providers/ToastProvider';
 import { storageClear } from '@/lib/storage';
 import { formatDate } from '@/lib/utils';
 
-const CURRENCIES = [
-  { label: 'PHP ₱', currency: 'PHP', symbol: '₱' },
-  { label: 'USD $', currency: 'USD', symbol: '$' },
-  { label: 'EUR €', currency: 'EUR', symbol: '€' },
-  { label: 'SGD S$', currency: 'SGD', symbol: 'S$' },
-  { label: 'JPY ¥', currency: 'JPY', symbol: '¥' },
-];
 
 export default function SettingsScreen() {
   const theme = useTheme();
@@ -117,21 +110,6 @@ export default function SettingsScreen() {
           </Card>
         </View>
 
-        {/* Currency */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>CURRENCY</Text>
-          <View style={styles.currencyRow}>
-            {CURRENCIES.map(c => (
-              <TouchableOpacity
-                key={c.currency}
-                onPress={() => { haptics.light(); updateSettings({ currency: c.currency, currencySymbol: c.symbol }); }}
-                style={[styles.currencyChip, { backgroundColor: settings?.currency === c.currency ? theme.primaryDim : theme.surface, borderColor: settings?.currency === c.currency ? theme.primary : theme.border }]}>
-                <Text style={[styles.currencyLabel, { color: settings?.currency === c.currency ? theme.primary : theme.textMuted }]}>{c.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
         {/* Categories */}
         <View style={styles.section}>
           <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>CATEGORIES</Text>
@@ -183,9 +161,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.md, paddingVertical: 14 },
   rowLabel: { fontSize: FontSize.md, fontWeight: '500', flex: 1 },
   input: { fontSize: FontSize.md, textAlign: 'right', flex: 1 },
-  currencyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  currencyChip: { paddingHorizontal: Spacing.md, paddingVertical: 8, borderRadius: BorderRadius.full, borderWidth: 1.5 },
-  currencyLabel: { fontSize: FontSize.sm, fontWeight: '600' },
   addCatBtn: { paddingVertical: 12, borderRadius: BorderRadius.md, borderWidth: 1.5, alignItems: 'center', borderStyle: 'dashed' },
   addCatLabel: { fontSize: FontSize.sm, fontWeight: '700' },
   dataRow: { flexDirection: 'row', alignItems: 'center', padding: Spacing.md, gap: Spacing.sm },
