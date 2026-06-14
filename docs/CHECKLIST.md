@@ -201,7 +201,67 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 
 ---
 
-## 8. Technical
+## 8. Database & Backend Setup
+
+> Architecture: mobile app (AsyncStorage offline-first) ↔ Expo Router API routes (server) ↔ Prisma ↔ Supabase PostgreSQL
+
+### 8a. Environment & Security
+- [ ] Add `.env` to `.gitignore` (never commit secrets)
+- [ ] Create `.env` with all required keys (user fills in values)
+- [ ] Create `.env.example` as a safe committed reference template
+- [ ] Verify `.env` is not tracked by git
+
+### 8b. Prisma Setup
+- [ ] Install `prisma` and `@prisma/client` as dependencies
+- [ ] Run `npx prisma init` to scaffold `prisma/schema.prisma`
+- [ ] Configure `datasource db` to use `DATABASE_URL` + `DIRECT_URL` (pgBouncer-safe)
+- [ ] Define all models matching app TypeScript types:
+  - [ ] `Category` (id, name, icon, color, isDefault, createdAt)
+  - [ ] `Expense` (id, amount, description, categoryId → Category, date, notes, createdAt)
+  - [ ] `SavingsGoal` (id, name, targetAmount, currentAmount, deadline?, icon, color, createdAt)
+  - [ ] `SavingsDeposit` (id, goalId → SavingsGoal cascade, amount, date, notes, createdAt)
+  - [ ] `AppSettings` (id, userName, currency, currencySymbol, monthlyBudget?, updatedAt)
+- [ ] Cascade deletes: deleting a goal deletes its deposits; deleting a category nullifies expenses
+- [ ] Create `src/lib/prisma.ts` — singleton Prisma client (dev-safe, no duplicate connections)
+- [ ] **User runs:** `npx prisma migrate dev --name init` to create the database schema
+- [ ] **User runs:** `npx prisma generate` to generate the typed client
+
+### 8c. Supabase Client
+- [ ] Create `src/lib/supabase.ts` — typed Supabase client using env vars
+- [ ] Import `react-native-url-polyfill` at app entry point (required for Supabase on RN)
+- [ ] Add `AsyncStorage` as Supabase auth storage adapter
+
+### 8d. Expo Router API Routes (server-side endpoints)
+- [ ] `src/app/api/expenses+api.ts` — GET (list), POST (create)
+- [ ] `src/app/api/expenses/[id]+api.ts` — DELETE
+- [ ] `src/app/api/categories+api.ts` — GET (list), POST (create), DELETE
+- [ ] `src/app/api/savings/goals+api.ts` — GET, POST
+- [ ] `src/app/api/savings/goals/[id]+api.ts` — DELETE
+- [ ] `src/app/api/savings/deposits+api.ts` — POST
+- [ ] `src/app/api/settings+api.ts` — GET, PUT
+- [ ] All routes use Prisma client (server only — never imported in RN bundle)
+- [ ] All routes return consistent `{ data, error }` response shape
+- [ ] Input validation on all POST/PUT routes
+
+### 8e. Sync Layer (mobile ↔ server)
+- [ ] Create `src/lib/sync.ts` — sync local AsyncStorage data to server via API routes
+- [ ] On app start: fetch server state and merge with local (server wins on conflict)
+- [ ] On mutation: optimistically update AsyncStorage, then POST to API route
+- [ ] Handle offline gracefully — queue failed requests and retry on reconnect
+- [ ] Add `useSync` hook that exposes sync status (idle / syncing / error)
+- [ ] Show sync indicator in Settings screen
+
+### 8f. Authentication (optional, enables multi-device sync)
+- [ ] Supabase email + password sign-up / sign-in
+- [ ] `src/app/auth/sign-in.tsx` — sign-in screen
+- [ ] `src/app/auth/sign-up.tsx` — sign-up screen
+- [ ] Auth gate in root layout — redirect to sign-in if not authenticated
+- [ ] Row-level security (RLS) on all Supabase tables (user can only see their own data)
+- [ ] Store session in AsyncStorage via Supabase auth adapter
+
+---
+
+## 9. Technical
 
 - [x] TanStack Query for all data fetching and mutation
 - [x] AsyncStorage as offline-first persistence layer
@@ -226,5 +286,6 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 | Dashboard | ✅ Done |
 | Savings | ✅ Done |
 | Settings | ✅ Done (export pending) |
+| Database & Backend | ⬜ Not Started |
 | UX Polish | ⬜ Not Started |
 | Technical | 🔄 In Progress |
