@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Alert, RefreshControl, SectionList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, SectionList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SwipeableRow } from '@/components/ui/SwipeableRow';
@@ -10,16 +10,26 @@ import { SkeletonCard } from '@/components/ui/SkeletonLoader';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { FALLBACK_CATEGORY_COLOR } from '@/constants/categories';
 import { useTheme } from '@/hooks/use-theme';
-import { useCategories, useCurrentMonthExpenses, useDeleteExpense } from '@/hooks/useExpenses';
+import { useCategories, useExpensesByMonth, useDeleteExpense } from '@/hooks/useExpenses';
 import { useHaptics } from '@/hooks/useHaptics';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
-import { formatCurrency, formatDateShort, formatMonth, groupByDate, todayISO } from '@/lib/utils';
-import { Category, Expense } from '@/types';
+import { formatCurrency, formatDateShort, groupByDate, todayISO } from '@/lib/utils';
+import { Expense } from '@/types';
+
+function getMonthKey(offset: number): string {
+  const now = new Date(todayISO());
+  const d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function formatMonthKey(key: string): string {
+  const [y, m] = key.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
 
 export default function ExpensesScreen() {
   const theme = useTheme();
-  const { data: expenses = [], isLoading, refetch } = useCurrentMonthExpenses();
   const { data: categories = [] } = useCategories();
   const { mutate: deleteExpense } = useDeleteExpense();
   const haptics = useHaptics();
@@ -27,13 +37,11 @@ export default function ExpensesScreen() {
 
   const [search, setSearch] = useState('');
   const [filterCategoryId, setFilterCategoryId] = useState<string>('');
+  const [monthOffset, setMonthOffset] = useState(0);
   const undoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function deleteWithUndo(expense: Expense) {
-    haptics.success();
-    undoRef.current = setTimeout(() => deleteExpense(expense.id), 3000);
-    toast('Expense deleted', { type: 'info', undoLabel: 'Undo', onUndo: () => { if (undoRef.current) clearTimeout(undoRef.current); } });
-  }
+  const monthKey = getMonthKey(monthOffset);
+  const { data: expenses = [], isLoading, refetch } = useExpensesByMonth(monthKey);
 
   const symbol = DEFAULT_CURRENCY_SYMBOL;
 
@@ -45,7 +53,17 @@ export default function ExpensesScreen() {
 
   const total = filtered.reduce((s, e) => s + e.amount, 0);
   const grouped = groupByDate(filtered);
-  const sections = grouped.map(g => ({ title: g.label, data: g.items }));
+  const sections = grouped.map(g => ({
+    title: g.label,
+    subtotal: g.items.reduce((s, e) => s + e.amount, 0),
+    data: g.items,
+  }));
+
+  function deleteWithUndo(expense: Expense) {
+    haptics.success();
+    undoRef.current = setTimeout(() => deleteExpense(expense.id), 3000);
+    toast('Expense deleted', { type: 'info', undoLabel: 'Undo', onUndo: () => { if (undoRef.current) clearTimeout(undoRef.current); } });
+  }
 
   function handleLongPress(expense: Expense) {
     haptics.medium();
@@ -64,21 +82,28 @@ export default function ExpensesScreen() {
           },
         }),
       },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => deleteWithUndo(expense),
-      },
+      { text: 'Delete', style: 'destructive', onPress: () => deleteWithUndo(expense) },
       { text: 'Cancel', style: 'cancel' },
     ]);
   }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top']}>
+      {/* Header with month selector */}
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
-        <View>
-          <Text style={[styles.title, { color: theme.text }]}>Expenses</Text>
-          <Text style={[styles.month, { color: theme.textSecondary }]}>{formatMonth(todayISO())}</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Expenses</Text>
+        <View style={styles.monthSelector}>
+          <TouchableOpacity onPress={() => setMonthOffset(o => o - 1)} hitSlop={12} accessibilityLabel="Previous month">
+            <Text style={[styles.arrow, { color: theme.primary }]}>‹</Text>
+          </TouchableOpacity>
+          <Text style={[styles.monthLabel, { color: theme.text }]}>{formatMonthKey(monthKey)}</Text>
+          <TouchableOpacity
+            onPress={() => setMonthOffset(o => Math.min(0, o + 1))}
+            hitSlop={12}
+            disabled={monthOffset === 0}
+            accessibilityLabel="Next month">
+            <Text style={[styles.arrow, { color: monthOffset === 0 ? theme.border : theme.primary }]}>›</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -91,9 +116,10 @@ export default function ExpensesScreen() {
           placeholderTextColor={theme.textMuted}
           value={search}
           onChangeText={setSearch}
+          autoCorrect={false}
         />
         {search ? (
-          <TouchableOpacity onPress={() => setSearch('')} hitSlop={12}>
+          <TouchableOpacity onPress={() => setSearch('')} hitSlop={12} accessibilityLabel="Clear search">
             <Text style={[styles.clearBtn, { color: theme.textMuted }]}>✕</Text>
           </TouchableOpacity>
         ) : null}
@@ -105,8 +131,7 @@ export default function ExpensesScreen() {
         </View>
       )}
 
-      {/* Category filter chips */}
-      {!isLoading && categories.length > 0 && (
+      {!isLoading && (
         <SectionList
           ListHeaderComponent={
             <>
@@ -119,8 +144,8 @@ export default function ExpensesScreen() {
                 </Text>
               </View>
 
-              {/* Category filter */}
-              <View style={styles.filterRow}>
+              {/* Category filter — horizontal scroll */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
                 <TouchableOpacity
                   onPress={() => setFilterCategoryId('')}
                   style={[styles.filterChip, { backgroundColor: !filterCategoryId ? theme.primaryDim : theme.backgroundElement, borderColor: !filterCategoryId ? theme.primary : theme.border }]}>
@@ -134,7 +159,7 @@ export default function ExpensesScreen() {
                     <Text style={styles.filterIcon}>{cat.icon}</Text>
                   </TouchableOpacity>
                 ))}
-              </View>
+              </ScrollView>
             </>
           }
           sections={sections}
@@ -162,18 +187,30 @@ export default function ExpensesScreen() {
           renderSectionHeader={({ section }) => (
             <View style={[styles.sectionHeader, { backgroundColor: theme.backgroundElement }]}>
               <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>{section.title}</Text>
+              <Text style={[styles.sectionSubtotal, { color: theme.textMuted }]}>
+                {formatCurrency(section.subtotal, symbol)}
+              </Text>
             </View>
           )}
           refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={theme.primary} />}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <EmptyState icon="💳" title="No expenses found" subtitle={search ? 'Try a different search term.' : 'Tap + to log your first expense.'} />
+            search
+              ? (
+                <View style={styles.emptySearch}>
+                  <Text style={[styles.emptySearchText, { color: theme.textMuted }]}>No results for "{search}"</Text>
+                  <TouchableOpacity onPress={() => setSearch('')} style={[styles.clearSearchBtn, { borderColor: theme.primary }]}>
+                    <Text style={[styles.clearSearchLabel, { color: theme.primary }]}>Clear search</Text>
+                  </TouchableOpacity>
+                </View>
+              )
+              : <EmptyState icon="💳" title="No expenses" subtitle="Tap + to log your first expense this month." />
           }
         />
       )}
 
-      {!isLoading && <FAB onPress={() => { haptics.light(); router.push('/add-expense'); }} />}
+      {!isLoading && <FAB onPress={() => { haptics.light(); router.push('/add-expense'); }} accessibilityLabel="Log expense" />}
     </SafeAreaView>
   );
 }
@@ -182,7 +219,9 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   header: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm, paddingTop: Spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth },
   title: { fontSize: FontSize.xxl, fontWeight: '700' },
-  month: { fontSize: FontSize.sm, marginTop: 2 },
+  monthSelector: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: 4 },
+  arrow: { fontSize: 22, fontWeight: '700', lineHeight: 26 },
+  monthLabel: { fontSize: FontSize.sm, fontWeight: '600', flex: 1, textAlign: 'center' },
   searchRow: { flexDirection: 'row', alignItems: 'center', marginHorizontal: Spacing.md, marginTop: Spacing.sm, borderRadius: BorderRadius.md, borderWidth: 1, paddingHorizontal: Spacing.md, height: 44 },
   searchIcon: { fontSize: 14, marginRight: 6 },
   searchInput: { flex: 1, fontSize: FontSize.md },
@@ -191,12 +230,13 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 0.8 },
   totalAmount: { fontSize: FontSize.xxxl, fontWeight: '700', marginTop: 4 },
   totalCount: { fontSize: FontSize.sm, marginTop: 2 },
-  filterRow: { flexDirection: 'row', paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm, gap: 8, flexWrap: 'wrap' },
+  filterRow: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm, gap: 8, flexDirection: 'row' },
   filterChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full, borderWidth: 1.5 },
   filterLabel: { fontSize: FontSize.sm, fontWeight: '600' },
   filterIcon: { fontSize: 14 },
-  sectionHeader: { paddingHorizontal: Spacing.md, paddingVertical: 6 },
+  sectionHeader: { paddingHorizontal: Spacing.md, paddingVertical: 6, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   sectionTitle: { fontSize: FontSize.sm, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
+  sectionSubtotal: { fontSize: FontSize.sm, fontWeight: '600' },
   listContent: { paddingBottom: 120 },
   expenseRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.md, paddingHorizontal: Spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, gap: Spacing.sm },
   iconWrap: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
@@ -205,4 +245,8 @@ const styles = StyleSheet.create({
   desc: { fontSize: FontSize.md, fontWeight: '500' },
   meta: { fontSize: FontSize.sm },
   amount: { fontSize: FontSize.md, fontWeight: '700' },
+  emptySearch: { alignItems: 'center', paddingTop: Spacing.xxl, gap: Spacing.md },
+  emptySearchText: { fontSize: FontSize.md },
+  clearSearchBtn: { paddingHorizontal: Spacing.lg, paddingVertical: 10, borderRadius: BorderRadius.full, borderWidth: 1.5 },
+  clearSearchLabel: { fontSize: FontSize.sm, fontWeight: '600' },
 });

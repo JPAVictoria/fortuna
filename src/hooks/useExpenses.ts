@@ -21,6 +21,14 @@ export function useCurrentMonthExpenses() {
   };
 }
 
+export function useExpensesByMonth(monthKey: string) {
+  const { data: expenses = [], ...rest } = useExpenses();
+  return {
+    ...rest,
+    data: expenses.filter((e) => getMonthKey(e.date) === monthKey),
+  };
+}
+
 export function useAddExpense() {
   const qc = useQueryClient();
   return useMutation({
