@@ -2,12 +2,14 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -45,6 +47,7 @@ export default function EditCategoryModal() {
   const [selectedColor, setSelectedColor] = useState(params.color ?? CATEGORY_COLOR_SWATCHES[0]);
 
   const resolvedIcon = customIcon.trim() || icon;
+  const canSubmit = isDefault || name.trim().length > 0;
 
   function handleSubmit() {
     if (!isDefault && !name.trim()) {
@@ -69,6 +72,7 @@ export default function EditCategoryModal() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.kav}>
         <View style={styles.handleWrap}>
           <View style={[styles.handle, { backgroundColor: theme.border }]} />
@@ -76,7 +80,7 @@ export default function EditCategoryModal() {
 
         <View style={styles.titleRow}>
           <Text style={[styles.title, { color: theme.text }]}>Edit Category</Text>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={16}>
+          <TouchableOpacity onPress={() => { Keyboard.dismiss(); router.back(); }} hitSlop={16} accessibilityLabel="Close">
             <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
           </TouchableOpacity>
         </View>
@@ -112,6 +116,7 @@ export default function EditCategoryModal() {
                 <TouchableOpacity
                   key={i}
                   onPress={() => { setIcon(i); setCustomIcon(''); }}
+                  accessibilityLabel={`Select icon ${i}`}
                   style={[styles.iconBtn, {
                     backgroundColor: icon === i && !customIcon ? selectedColor + '33' : theme.backgroundElement,
                     borderColor: icon === i && !customIcon ? selectedColor : theme.border,
@@ -137,6 +142,7 @@ export default function EditCategoryModal() {
                 <TouchableOpacity
                   key={color}
                   onPress={() => setSelectedColor(color)}
+                  accessibilityLabel={`Select color ${color}`}
                   style={[styles.swatch, { backgroundColor: color }, selectedColor === color && styles.swatchActive]}>
                   {selectedColor === color && <Text style={styles.swatchCheck}>✓</Text>}
                 </TouchableOpacity>
@@ -144,9 +150,10 @@ export default function EditCategoryModal() {
             </View>
           </View>
 
-          <Button label="Save Changes" onPress={handleSubmit} loading={isPending} fullWidth size="lg" style={styles.submit} />
+          <Button label="Save Changes" onPress={handleSubmit} loading={isPending} disabled={!canSubmit} fullWidth size="lg" style={styles.submit} />
         </ScrollView>
       </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }

@@ -3,12 +3,14 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,7 +23,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useCategories, useUpdateExpense } from '@/hooks/useExpenses';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useToast } from '@/providers/ToastProvider';
-import { formatDate } from '@/lib/utils';
+import { formatAmountInput, formatDate } from '@/lib/utils';
 
 export default function EditExpenseModal() {
   const theme = useTheme();
@@ -39,12 +41,15 @@ export default function EditExpenseModal() {
     notes: string;
   }>();
 
-  const [amount, setAmount] = useState(params.amount ?? '');
+  const [amount, setAmount] = useState(params.amount ? formatAmountInput(params.amount) : '');
   const [description, setDescription] = useState(params.description ?? '');
   const [notes, setNotes] = useState(params.notes ?? '');
   const [selectedCategoryId, setSelectedCategoryId] = useState(params.categoryId ?? '');
   const [date, setDate] = useState(new Date(params.date ?? Date.now()));
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const parsedAmount = parseFloat(amount.replace(/,/g, ''));
+  const canSubmit = !isNaN(parsedAmount) && parsedAmount > 0 && description.trim().length > 0 && selectedCategoryId.length > 0;
 
   function handleSubmit() {
     const parsed = parseFloat(amount.replace(/,/g, ''));
@@ -89,12 +94,13 @@ export default function EditExpenseModal() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.kav}>
         <View style={styles.handleWrap}><View style={[styles.handle, { backgroundColor: theme.border }]} /></View>
 
         <View style={styles.titleRow}>
           <Text style={[styles.title, { color: theme.text }]}>Edit Expense</Text>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={16}>
+          <TouchableOpacity onPress={() => { Keyboard.dismiss(); router.back(); }} hitSlop={16} accessibilityLabel="Close">
             <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
           </TouchableOpacity>
         </View>
@@ -105,7 +111,7 @@ export default function EditExpenseModal() {
             prefix={DEFAULT_CURRENCY_SYMBOL}
             placeholder="0.00"
             value={amount}
-            onChangeText={setAmount}
+            onChangeText={v => setAmount(formatAmountInput(v))}
             keyboardType="decimal-pad"
             returnKeyType="next"
             autoFocus
@@ -171,9 +177,10 @@ export default function EditExpenseModal() {
             multiline
             style={{ minHeight: 64, textAlignVertical: 'top' }}
           />
-          <Button label="Save Changes" onPress={handleSubmit} loading={isPending} fullWidth size="lg" style={styles.submit} />
+          <Button label="Save Changes" onPress={handleSubmit} loading={isPending} disabled={!canSubmit} fullWidth size="lg" style={styles.submit} />
         </ScrollView>
       </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }

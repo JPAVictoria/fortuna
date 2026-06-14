@@ -1,7 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
@@ -13,7 +13,7 @@ import { useHaptics } from '@/hooks/useHaptics';
 import { useAddSavingsGoal } from '@/hooks/useSavings';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
-import { formatDate } from '@/lib/utils';
+import { formatAmountInput, formatDate } from '@/lib/utils';
 
 const GOAL_ICONS = ['🏠', '✈️', '🚗', '💻', '📱', '🎓', '💍', '🏋️', '🌏', '🛡️', '🎸', '🍀'];
 
@@ -29,6 +29,9 @@ export default function AddGoalModal() {
   const [selectedColor, setSelectedColor] = useState(CATEGORY_COLOR_SWATCHES[7]);
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const parsedAmount = parseFloat(targetAmount.replace(/,/g, ''));
+  const canSubmit = name.trim().length > 0 && !isNaN(parsedAmount) && parsedAmount > 0;
 
   function handleSubmit() {
     const parsed = parseFloat(targetAmount.replace(/,/g, ''));
@@ -46,18 +49,19 @@ export default function AddGoalModal() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.kav}>
         <View style={styles.handleWrap}><View style={[styles.handle, { backgroundColor: theme.border }]} /></View>
         <View style={styles.titleRow}>
           <Text style={[styles.title, { color: theme.text }]}>New Savings Goal</Text>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={16}>
+          <TouchableOpacity onPress={() => { Keyboard.dismiss(); router.back(); }} hitSlop={16} accessibilityLabel="Close">
             <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
           <Input label="Goal Name" placeholder="e.g. Emergency Fund, New Laptop..." value={name} onChangeText={setName} returnKeyType="next" />
-          <Input label="Target Amount" prefix={DEFAULT_CURRENCY_SYMBOL} placeholder="0.00" value={targetAmount} onChangeText={setTargetAmount} keyboardType="decimal-pad" returnKeyType="done" />
+          <Input label="Target Amount" prefix={DEFAULT_CURRENCY_SYMBOL} placeholder="0.00" value={targetAmount} onChangeText={v => setTargetAmount(formatAmountInput(v))} keyboardType="decimal-pad" returnKeyType="done" />
 
           {/* Icon picker */}
           <View style={styles.field}>
@@ -65,6 +69,7 @@ export default function AddGoalModal() {
             <View style={styles.iconGrid}>
               {GOAL_ICONS.map(icon => (
                 <TouchableOpacity key={icon} onPress={() => { haptics.light(); setSelectedIcon(icon); }}
+                  accessibilityLabel={`Select icon ${icon}`}
                   style={[styles.iconBtn, { backgroundColor: selectedIcon === icon ? selectedColor + '33' : theme.backgroundElement, borderColor: selectedIcon === icon ? selectedColor : theme.border, borderWidth: selectedIcon === icon ? 2 : 1 }]}>
                   <Text style={styles.iconText}>{icon}</Text>
                 </TouchableOpacity>
@@ -78,6 +83,7 @@ export default function AddGoalModal() {
             <View style={styles.colorRow}>
               {CATEGORY_COLOR_SWATCHES.map(color => (
                 <TouchableOpacity key={color} onPress={() => { haptics.light(); setSelectedColor(color); }}
+                  accessibilityLabel={`Select color ${color}`}
                   style={[styles.swatch, { backgroundColor: color }, selectedColor === color && styles.swatchActive]}>
                   {selectedColor === color && <Text style={styles.swatchCheck}>✓</Text>}
                 </TouchableOpacity>
@@ -90,13 +96,14 @@ export default function AddGoalModal() {
             <Text style={[styles.label, { color: theme.textSecondary }]}>DEADLINE (OPTIONAL)</Text>
             <TouchableOpacity
               onPress={() => setShowDatePicker(true)}
+              accessibilityLabel={deadline ? `Deadline: ${formatDate(deadline.toISOString())}` : 'Set deadline'}
               style={[styles.deadlineBtn, { backgroundColor: theme.backgroundElement, borderColor: deadline ? theme.primary : theme.border }]}>
               <Text style={styles.calIcon}>📅</Text>
               <Text style={[styles.deadlineLabel, { color: deadline ? theme.text : theme.textMuted }]}>
                 {deadline ? formatDate(deadline.toISOString()) : 'No deadline set'}
               </Text>
               {deadline && (
-                <TouchableOpacity onPress={() => setDeadline(null)} hitSlop={12}>
+                <TouchableOpacity onPress={() => setDeadline(null)} hitSlop={12} accessibilityLabel="Clear deadline">
                   <Text style={[styles.clearDeadline, { color: theme.textMuted }]}>✕</Text>
                 </TouchableOpacity>
               )}
@@ -123,9 +130,10 @@ export default function AddGoalModal() {
             <Text style={[styles.previewAmount, { color: theme.textMuted }]}>Target: {DEFAULT_CURRENCY_SYMBOL}{targetAmount || '0.00'}</Text>
           </View>
 
-          <Button label="Create Goal" onPress={handleSubmit} loading={isPending} fullWidth size="lg" style={styles.submit} />
+          <Button label="Create Goal" onPress={handleSubmit} loading={isPending} disabled={!canSubmit} fullWidth size="lg" style={styles.submit} />
         </ScrollView>
       </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }

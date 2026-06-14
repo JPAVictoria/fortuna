@@ -2,11 +2,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,6 +19,7 @@ import { FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAddDeposit } from '@/hooks/useSavings';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
+import { formatAmountInput } from '@/lib/utils';
 
 export default function AddDepositModal() {
   const theme = useTheme();
@@ -25,6 +28,9 @@ export default function AddDepositModal() {
 
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
+
+  const parsedAmount = parseFloat(amount.replace(/,/g, ''));
+  const canSubmit = !isNaN(parsedAmount) && parsedAmount > 0;
 
   function handleSubmit() {
     const parsed = parseFloat(amount.replace(/,/g, ''));
@@ -45,6 +51,7 @@ export default function AddDepositModal() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.kav}>
         <View style={styles.handleWrap}>
           <View style={[styles.handle, { backgroundColor: theme.border }]} />
@@ -57,7 +64,7 @@ export default function AddDepositModal() {
               <Text style={[styles.goalName, { color: theme.gold }]}>🪙 {goalName}</Text>
             ) : null}
           </View>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={16}>
+          <TouchableOpacity onPress={() => { Keyboard.dismiss(); router.back(); }} hitSlop={16} accessibilityLabel="Close">
             <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
           </TouchableOpacity>
         </View>
@@ -68,7 +75,7 @@ export default function AddDepositModal() {
             prefix={DEFAULT_CURRENCY_SYMBOL}
             placeholder="0.00"
             value={amount}
-            onChangeText={setAmount}
+            onChangeText={v => setAmount(formatAmountInput(v))}
             keyboardType="decimal-pad"
             returnKeyType="next"
             autoFocus
@@ -86,12 +93,14 @@ export default function AddDepositModal() {
             label="Add to Savings"
             onPress={handleSubmit}
             loading={isPending}
+            disabled={!canSubmit}
             fullWidth
             size="lg"
             style={styles.submit}
           />
         </View>
       </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }
