@@ -13,7 +13,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 - [x] Install all dependencies (`@react-native-async-storage/async-storage`, `@supabase/supabase-js`, `@tanstack/react-query`, `nativewind`, `tailwindcss`, `react-native-svg`, `expo-image-picker`, `react-native-url-polyfill`, `dotenv`)
 - [x] Set up folder structure (components, hooks, lib, types, providers, constants)
 - [x] Define Fortuna design system (emerald green palette, typography, spacing, border-radius)
-- [x] Define TypeScript types (Category, Expense, SavingsGoal, SavingsDeposit, AppSettings)
+- [x] Define TypeScript types (Category, Expense, SavingsGoal, SavingsDeposit, AppSettings, Income, RecurringExpense)
 - [x] Set up AsyncStorage data layer (`lib/storage.ts`)
 - [x] Set up utility functions (`lib/utils.ts` — formatCurrency, formatDate, groupByDate, generateId)
 - [x] Set up default categories (`constants/categories.ts`)
@@ -287,5 +287,5 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 | Savings | ✅ Done |
 | Settings | ✅ Done |
 | Database & Backend | 🔄 In Progress (RLS + userId pending) |
-| UX Polish | 🔄 In Progress (heat-map, per-cat budgets, year-in-review, recurring, multi-currency, income/net-worth, bulk-edit, widget remaining) |
+| UX Polish | 🔄 In Progress (heat-map calendar, multi-currency real-time, net worth, bill reminders, round-up savings, auto-savings, savings jars, widget/shortcut remaining) |
 | Technical | 🔄 In Progress (error boundaries, perf, tests remaining) |
