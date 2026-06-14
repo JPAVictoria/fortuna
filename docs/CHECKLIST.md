@@ -10,52 +10,52 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 ## 0. Project Setup
 
 - [x] Initialize Expo SDK 56 project
-- [ ] Install all dependencies (`@react-native-async-storage/async-storage`, `@supabase/supabase-js`, `@tanstack/react-query`, `nativewind`, `tailwindcss`, `react-native-svg`, `expo-image-picker`, `react-native-url-polyfill`, `dotenv`, `prisma`, `tsx`, `ws`)
-- [ ] Set up folder structure (components, hooks, lib, types, providers, constants)
-- [ ] Define Fortuna design system (emerald green palette, typography, spacing, border-radius)
-- [ ] Define TypeScript types (Category, Expense, SavingsGoal, SavingsDeposit, AppSettings)
-- [ ] Set up AsyncStorage data layer (`lib/storage.ts`)
-- [ ] Set up utility functions (`lib/utils.ts` — formatCurrency, formatDate, groupByDate, generateId)
-- [ ] Set up default categories (`constants/categories.ts`)
-- [ ] Set up TanStack Query provider (`providers/QueryProvider.tsx`)
-- [ ] Update README with full codebase guide
+- [x] Install all dependencies (`@react-native-async-storage/async-storage`, `@supabase/supabase-js`, `@tanstack/react-query`, `nativewind`, `tailwindcss`, `react-native-svg`, `expo-image-picker`, `react-native-url-polyfill`, `dotenv`)
+- [x] Set up folder structure (components, hooks, lib, types, providers, constants)
+- [x] Define Fortuna design system (emerald green palette, typography, spacing, border-radius)
+- [x] Define TypeScript types (Category, Expense, SavingsGoal, SavingsDeposit, AppSettings)
+- [x] Set up AsyncStorage data layer (`lib/storage.ts`)
+- [x] Set up utility functions (`lib/utils.ts` — formatCurrency, formatDate, groupByDate, generateId)
+- [x] Set up default categories (`constants/categories.ts`)
+- [x] Set up TanStack Query provider (`providers/QueryProvider.tsx`)
+- [x] Update README with full codebase guide
 - [ ] Configure app.json (splash color, scheme, app name)
 
 ---
 
 ## 1. Navigation & Layout
 
-- [ ] Root Stack layout with modal support (`app/_layout.tsx`)
-- [ ] Bottom tab navigator with 4 tabs: Dashboard, Expenses, Savings, Settings (`app/(tabs)/_layout.tsx`)
-- [ ] Emerald-themed tab bar (active/inactive states, icon + label)
-- [ ] Safe area handling across all screens
+- [x] Root Stack layout with modal support (`app/_layout.tsx`)
+- [x] Bottom tab navigator with 4 tabs: Dashboard, Expenses, Savings, Settings (`app/(tabs)/_layout.tsx`)
+- [x] Emerald-themed tab bar (active/inactive states, icon + label)
+- [x] Safe area handling across all screens
 
 ---
 
 ## 2. Expense Logging
 
-- [ ] **Add Expense modal** (`app/add-expense.tsx`)
-  - [ ] Amount input (numeric keyboard, currency-formatted)
-  - [ ] Description input
-  - [ ] Category picker (horizontal scroll of chips, tap to select)
-  - [ ] Date (defaults to today)
-  - [ ] Optional notes field
-  - [ ] Submit + validation (amount > 0, category selected, description filled)
-- [ ] **Expenses list screen** (`app/(tabs)/expenses.tsx`)
-  - [ ] Monthly total card at top
-  - [ ] Expenses grouped by date (Today, Yesterday, earlier dates)
-  - [ ] Each row: category icon + name, description, formatted amount, date
-  - [ ] Empty state when no expenses
-  - [ ] Floating action button (+) to open Add Expense modal
-- [ ] **Expense item component** with swipe-to-delete or long-press menu
-- [ ] **Category badge** component (color-coded pill)
-- [ ] Delete expense with confirmation
+- [x] **Add Expense modal** (`app/add-expense.tsx`)
+  - [x] Amount input (numeric keyboard, currency-formatted)
+  - [x] Description input
+  - [x] Category picker (horizontal scroll of chips, tap to select)
+  - [x] Date (defaults to today)
+  - [x] Optional notes field
+  - [x] Submit + validation (amount > 0, category selected, description filled)
+- [x] **Expenses list screen** (`app/(tabs)/expenses.tsx`)
+  - [x] Monthly total card at top
+  - [x] Expenses grouped by date (Today, Yesterday, earlier dates)
+  - [x] Each row: category icon + name, description, formatted amount, date
+  - [x] Empty state when no expenses
+  - [x] Floating action button (+) to open Add Expense modal
+- [x] **Expense item component** with long-press delete menu
+- [x] **Category badge** component (color-coded pill)
+- [x] Delete expense with confirmation
 
 ---
 
 ## 3. Expense Categories (Creatable)
 
-- [ ] **Default categories** pre-seeded on first launch:
+- [x] **Default categories** pre-seeded on first launch:
   - 🍽️ Food & Dining
   - 🚗 Transport
   - 🛍️ Shopping
@@ -66,70 +66,72 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
   - 📚 Education
   - 📱 Subscriptions
   - 📦 Other
-- [ ] **Add Category modal** (`app/add-category.tsx`)
-  - [ ] Name input
-  - [ ] Emoji icon input
-  - [ ] Color swatch picker (8 preset colors)
-  - [ ] Validation + save
-- [ ] **Category management in Settings** — list all categories, add new, delete custom
+- [x] **Add Category modal** (`app/add-category.tsx`)
+  - [x] Name input
+  - [x] Emoji icon input (grid + custom text)
+  - [x] Color swatch picker (12 preset colors)
+  - [x] Live preview badge + validation + save
+- [x] **Category management in Settings** — list all categories, add new, delete custom
 
 ---
 
 ## 4. Dashboard
 
-- [ ] **Dashboard screen** (`app/(tabs)/index.tsx`)
-  - [ ] Greeting header ("Good morning/afternoon/evening + name" + current month)
-  - [ ] Hero balance card:
+- [x] **Dashboard screen** (`app/(tabs)/index.tsx`)
+  - [x] Greeting header ("Good morning/afternoon/evening + name" + current month)
+  - [x] Hero balance card:
     - Total spent this month (large, prominent)
     - Total saved this month
     - Remaining budget (if monthly budget set)
-  - [ ] Quick action buttons: "+ Add Expense" · "+ Add Savings"
-  - [ ] **Top 3 Expense Categories** chart:
+  - [x] Quick action buttons: "+ Add Expense" · "+ Save Money"
+  - [x] **Top 3 Expense Categories** chart:
     - Category icon, name, amount, percentage bar
     - Only shows current month's data
-  - [ ] **Recent Transactions** (last 5):
+  - [x] **Recent Transactions** (last 5):
     - Category icon, description, amount, date
     - "View All" link to expenses screen
-  - [ ] Empty state for first-time users
+  - [x] Empty state for first-time users
 
 ---
 
 ## 5. Savings
 
-- [ ] **Savings screen** (`app/(tabs)/savings.tsx`)
-  - [ ] Total savings summary card (gold-themed)
-  - [ ] List of savings goals as cards
-  - [ ] Empty state with prompt to create first goal
-  - [ ] FAB to create new goal
-- [ ] **Savings Goal card** (`components/savings/SavingsGoalCard.tsx`)
-  - [ ] Goal name + icon
-  - [ ] Progress bar (current / target)
-  - [ ] Amount: saved vs target
-  - [ ] Deadline countdown (if set)
-  - [ ] "+ Add Deposit" button per goal
-- [ ] **Add Savings Goal modal** (`app/add-goal.tsx`)
-  - [ ] Goal name
-  - [ ] Target amount
-  - [ ] Icon (emoji)
-  - [ ] Color (swatches)
+- [x] **Savings screen** (`app/(tabs)/savings.tsx`)
+  - [x] Total savings summary card (gold-themed)
+  - [x] List of savings goals as cards
+  - [x] Empty state with prompt to create first goal
+  - [x] FAB to create new goal
+- [x] **Savings Goal card** (`components/savings/SavingsGoalCard.tsx`)
+  - [x] Goal name + icon
+  - [x] Progress bar (current / target)
+  - [x] Amount: saved vs target
+  - [x] Deadline countdown (if set)
+  - [x] "+ Add Deposit" button per goal
+- [x] **Add Savings Goal modal** (`app/add-goal.tsx`)
+  - [x] Goal name
+  - [x] Target amount
+  - [x] Icon (emoji grid)
+  - [x] Color (swatches) + live preview
   - [ ] Optional deadline date
-- [ ] **Add Deposit modal** (`app/add-deposit.tsx`)
-  - [ ] Amount input
-  - [ ] Auto-linked to the goal
-  - [ ] Optional notes
-- [ ] Goal completion state (visual celebration when 100% reached)
+- [x] **Add Deposit modal** (`app/add-deposit.tsx`)
+  - [x] Amount input
+  - [x] Auto-linked to the goal (via route params)
+  - [x] Optional notes
+- [x] Goal completion state (visual "Done ✓" badge when 100% reached)
 
 ---
 
 ## 6. Settings
 
-- [ ] **Settings screen** (`app/(tabs)/settings.tsx`)
-  - [ ] Profile section: display name, currency selector
-  - [ ] Monthly budget field (used for budget remaining in dashboard)
-  - [ ] Categories section: list + manage + add new
-  - [ ] Data section: export, clear all data (with confirmation)
-  - [ ] App version display
-- [ ] Settings persisted via AsyncStorage
+- [x] **Settings screen** (`app/(tabs)/settings.tsx`)
+  - [x] Profile section: display name, monthly budget field
+  - [x] Currency selector (PHP, USD, EUR, SGD, JPY)
+  - [x] Monthly budget field (used for budget remaining in dashboard)
+  - [x] Categories section: list + manage + add new
+  - [x] Data section: clear all data (with confirmation)
+  - [x] App version display
+  - [ ] Export data (CSV/JSON)
+- [x] Settings persisted via AsyncStorage
 
 ---
 
@@ -201,12 +203,12 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 
 ## 8. Technical
 
-- [ ] TanStack Query for all data fetching and mutation
-- [ ] AsyncStorage as offline-first persistence layer
+- [x] TanStack Query for all data fetching and mutation
+- [x] AsyncStorage as offline-first persistence layer
 - [ ] Supabase client configured (future cloud sync)
-- [ ] TypeScript strict mode throughout
+- [x] TypeScript strict mode throughout
 - [ ] Proper error boundaries
-- [ ] Expo Router typed routes
+- [x] Expo Router typed routes
 - [ ] Performance: `React.memo` on list items, `useCallback` on handlers
 - [ ] Unit tests for utility functions (formatCurrency, groupByDate)
 - [ ] E2E test: log expense → appears on dashboard
@@ -217,12 +219,12 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 
 | Area | Status |
 |---|---|
-| Project Setup | 🔄 In Progress |
-| Navigation | ⬜ Not Started |
-| Expense Logging | ⬜ Not Started |
-| Categories | ⬜ Not Started |
-| Dashboard | ⬜ Not Started |
-| Savings | ⬜ Not Started |
-| Settings | ⬜ Not Started |
+| Project Setup | ✅ Done |
+| Navigation | ✅ Done |
+| Expense Logging | ✅ Done |
+| Categories | ✅ Done |
+| Dashboard | ✅ Done |
+| Savings | ✅ Done |
+| Settings | ✅ Done (export pending) |
 | UX Polish | ⬜ Not Started |
-| Technical | ⬜ Not Started |
+| Technical | 🔄 In Progress |
