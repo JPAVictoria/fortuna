@@ -1,11 +1,12 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, RefreshControl, SectionList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SwipeableRow } from '@/components/ui/SwipeableRow';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FAB } from '@/components/ui/FAB';
+import { SkeletonCard } from '@/components/ui/SkeletonLoader';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { FALLBACK_CATEGORY_COLOR } from '@/constants/categories';
 import { useTheme } from '@/hooks/use-theme';
@@ -26,6 +27,13 @@ export default function ExpensesScreen() {
 
   const [search, setSearch] = useState('');
   const [filterCategoryId, setFilterCategoryId] = useState<string>('');
+  const undoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function deleteWithUndo(expense: Expense) {
+    haptics.success();
+    undoRef.current = setTimeout(() => deleteExpense(expense.id), 3000);
+    toast('Expense deleted', { type: 'info', undoLabel: 'Undo', onUndo: () => { if (undoRef.current) clearTimeout(undoRef.current); } });
+  }
 
   const symbol = DEFAULT_CURRENCY_SYMBOL;
 
@@ -59,17 +67,7 @@ export default function ExpensesScreen() {
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => {
-          haptics.warning();
-          Alert.alert('Delete Expense', `Remove "${expense.description}"?`, [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Delete',
-              style: 'destructive',
-              onPress: () => { deleteExpense(expense.id); haptics.success(); toast('Expense deleted'); },
-            },
-          ]);
-        },
+        onPress: () => deleteWithUndo(expense),
       },
       { text: 'Cancel', style: 'cancel' },
     ]);
@@ -101,8 +99,14 @@ export default function ExpensesScreen() {
         ) : null}
       </View>
 
+      {isLoading && (
+        <View style={{ paddingTop: Spacing.sm }}>
+          {[0, 1, 2, 3].map(i => <SkeletonCard key={i} />)}
+        </View>
+      )}
+
       {/* Category filter chips */}
-      {categories.length > 0 && (
+      {!isLoading && categories.length > 0 && (
         <SectionList
           ListHeaderComponent={
             <>
@@ -138,7 +142,7 @@ export default function ExpensesScreen() {
           renderItem={({ item }) => {
             const cat = categories.find(c => c.id === item.categoryId);
             return (
-              <SwipeableRow onDelete={() => handleLongPress(item)}>
+              <SwipeableRow onDelete={() => deleteWithUndo(item)}>
                 <TouchableOpacity
                   onLongPress={() => handleLongPress(item)}
                   activeOpacity={0.85}
@@ -169,7 +173,7 @@ export default function ExpensesScreen() {
         />
       )}
 
-      <FAB onPress={() => { haptics.light(); router.push('/add-expense'); }} />
+      {!isLoading && <FAB onPress={() => { haptics.light(); router.push('/add-expense'); }} />}
     </SafeAreaView>
   );
 }

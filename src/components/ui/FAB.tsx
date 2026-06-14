@@ -6,16 +6,19 @@ import { useTheme } from '@/hooks/use-theme';
 type Props = {
   onPress: () => void;
   label?: string;
+  accessibilityLabel?: string;
 };
 
-export function FAB({ onPress, label = '+' }: Props) {
+export function FAB({ onPress, label = '+', accessibilityLabel = 'Add new' }: Props) {
   const theme = useTheme();
 
   return (
     <TouchableOpacity
       style={[styles.fab, { backgroundColor: theme.primary }]}
       onPress={onPress}
-      activeOpacity={0.8}>
+      activeOpacity={0.8}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button">
       <Text style={styles.label}>{label}</Text>
     </TouchableOpacity>
   );

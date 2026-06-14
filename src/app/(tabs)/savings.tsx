@@ -6,6 +6,7 @@ import { SavingsGoalCard } from '@/components/savings/SavingsGoalCard';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FAB } from '@/components/ui/FAB';
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSavingsGoals, useTotalSaved } from '@/hooks/useSavings';
@@ -51,6 +52,12 @@ export default function SavingsScreen() {
           </Text>
         </View>
 
+        {isLoading && (
+          <View style={{ gap: Spacing.sm, paddingTop: Spacing.sm }}>
+            {[0, 1].map(i => <SkeletonLoader key={i} height={120} borderRadius={14} />)}
+          </View>
+        )}
+
         {goals.length === 0 && !isLoading ? (
           <View style={styles.emptyWrap}>
             <EmptyState icon="🪙" title="No savings goals yet" subtitle="Create your first goal and start building your fortune." />
@@ -79,7 +86,7 @@ export default function SavingsScreen() {
         )}
       </ScrollView>
 
-      {goals.length > 0 && <FAB onPress={() => { haptics.light(); router.push('/add-goal'); }} />}
+      {goals.length > 0 && !isLoading && <FAB onPress={() => { haptics.light(); router.push('/add-goal'); }} />}
     </SafeAreaView>
   );
 }

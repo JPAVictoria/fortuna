@@ -1,7 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
@@ -12,7 +12,7 @@ import { useAddExpense, useCategories } from '@/hooks/useExpenses';
 import { useHaptics } from '@/hooks/useHaptics';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
-import { formatDate, todayISO } from '@/lib/utils';
+import { formatAmountInput, formatDate, todayISO } from '@/lib/utils';
 
 export default function AddExpenseModal() {
   const theme = useTheme();
@@ -64,6 +64,7 @@ export default function AddExpenseModal() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.kav}>
         <View style={styles.handleWrap}><View style={[styles.handle, { backgroundColor: theme.border }]} /></View>
 
@@ -75,7 +76,7 @@ export default function AddExpenseModal() {
         </View>
 
         <ScrollView contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
-          <Input label="Amount" prefix={DEFAULT_CURRENCY_SYMBOL} placeholder="0.00" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" returnKeyType="next" autoFocus autoCorrect={false} />
+          <Input label="Amount" prefix={DEFAULT_CURRENCY_SYMBOL} placeholder="0.00" value={amount} onChangeText={v => setAmount(formatAmountInput(v))} keyboardType="decimal-pad" returnKeyType="next" autoFocus autoCorrect={false} />
           <Input label="Description" placeholder="What did you spend on?" value={description} onChangeText={setDescription} returnKeyType="next" autoCorrect={false} />
 
           <View style={styles.field}>
@@ -123,6 +124,7 @@ export default function AddExpenseModal() {
           <Button label="Log Expense" onPress={handleSubmit} loading={isPending} fullWidth size="lg" style={styles.submit} />
         </ScrollView>
       </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }

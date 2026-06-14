@@ -85,3 +85,12 @@ export function daysUntil(isoString: string): number {
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
+
+export function formatAmountInput(raw: string): string {
+  const stripped = raw.replace(/[^0-9.]/g, '');
+  const parts = stripped.split('.');
+  const integer = parts[0].replace(/^0+(?=\d)/, '');
+  const withCommas = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  if (parts.length > 1) return `${withCommas}.${parts[1].slice(0, 2)}`;
+  return withCommas;
+}
