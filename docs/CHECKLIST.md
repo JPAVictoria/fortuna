@@ -141,13 +141,13 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 - [x] Haptic feedback on primary actions (add expense, save goal, delete, errors)
 - [x] Swipe-to-delete on expense items
 - [x] Pull-to-refresh on all list screens (expenses, savings, dashboard)
-- [ ] Skeleton loading placeholders while data loads
+- [x] Skeleton loading placeholders while data loads
 - [x] Toast/snackbar notifications for success and error states
-- [ ] Smooth animated transitions between tabs
+- [x] Smooth animated transitions between tabs
 
 ### Data Visualization
 - [x] Pie/donut chart for expense category breakdown (react-native-svg)
-- [ ] Monthly trend line chart (spend over last 6 months)
+- [x] Monthly trend line chart (spend over last 6 months)
 - [ ] Spending heat-map calendar view
 - [x] Budget ring / radial progress (Fortune Score radial ring)
 
@@ -158,7 +158,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 - [x] Monthly budget report card (S/A/B/C/D/F grade in Fortune Score)
 - [x] "Fortune Score" — 0–100 score: savings rate (40pts) + budget adherence (30pts) + diversity (15pts) + goals (15pts)
 - [ ] Year-in-review summary (December special screen)
-- [ ] Projected savings date calculator
+- [x] Projected savings date calculator
 
 ### Expense Enhancements
 - [ ] Recurring expense templates (daily, weekly, monthly)
@@ -171,7 +171,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 - [ ] Bulk delete / edit expenses
 
 ### Savings Enhancements
-- [ ] Confetti animation when a savings goal is completed 🎉
+- [x] Confetti animation when a savings goal is completed 🎉
 - [ ] Round-up savings (e.g., round every expense to nearest 50, save the difference)
 - [ ] Auto-savings rules ("save 10% of every income entry")
 - [ ] Multiple savings "jars" within one goal
@@ -186,7 +186,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 ### Personalization
 - [x] Dark / Light mode (follows system — automatic)
 - [x] Fortuna quotes / affirmations on the dashboard (12 Latin quotes with translations, rotates daily)
-- [ ] Custom accent color (choose from palette)
+- [x] Custom accent color (choose from palette)
 - [x] Onboarding flow for new users (3-step: welcome → name + currency → first goal)
 - [ ] App icon variants
 
@@ -197,7 +197,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 ### Platform Extras
 - [ ] iOS widget for quick balance view
 - [ ] Android home screen shortcut for "Log Expense"
-- [ ] Share expense summary as image/card
+- [x] Share expense summary as image/card
 
 ---
 
@@ -265,7 +265,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 
 - [x] TanStack Query for all data fetching and mutation
 - [x] AsyncStorage as offline-first persistence layer
-- [ ] Supabase client configured (future cloud sync)
+- [x] Supabase client configured (future cloud sync)
 - [x] TypeScript strict mode throughout
 - [ ] Proper error boundaries
 - [x] Expo Router typed routes
@@ -285,7 +285,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 | Categories | ✅ Done |
 | Dashboard | ✅ Done |
 | Savings | ✅ Done |
-| Settings | ✅ Done (export pending) |
+| Settings | ✅ Done |
 | Database & Backend | 🔄 In Progress (RLS + userId pending) |
-| UX Polish | 🔄 In Progress |
-| Technical | 🔄 In Progress |
+| UX Polish | 🔄 In Progress (heat-map, per-cat budgets, year-in-review, recurring, multi-currency, income/net-worth, bulk-edit, widget remaining) |
+| Technical | 🔄 In Progress (error boundaries, perf, tests remaining) |
