@@ -1,6 +1,7 @@
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
+import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useTheme } from '@/hooks/use-theme';
 import { useDeleteSavingsGoal } from '@/hooks/useSavings';
 import { daysUntil, formatCurrency } from '@/lib/utils';
@@ -13,7 +14,7 @@ type Props = {
   currencySymbol?: string;
 };
 
-export function SavingsGoalCard({ goal, onDeposit, currencySymbol = '₱' }: Props) {
+export function SavingsGoalCard({ goal, onDeposit, currencySymbol = DEFAULT_CURRENCY_SYMBOL }: Props) {
   const theme = useTheme();
   const { mutate: deleteGoal } = useDeleteSavingsGoal();
   const progress = goal.targetAmount > 0 ? goal.currentAmount / goal.targetAmount : 0;

@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/Input';
 import { FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAddDeposit } from '@/hooks/useSavings';
-import { useSettings } from '@/hooks/useSettings';
+import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
 
 export default function AddDepositModal() {
   const theme = useTheme();
@@ -27,7 +27,7 @@ export default function AddDepositModal() {
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
 
-  const symbol = settings?.currencySymbol ?? '₱';
+  const symbol = settings?.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
 
   function handleSubmit() {
     const parsed = parseFloat(amount.replace(/,/g, ''));

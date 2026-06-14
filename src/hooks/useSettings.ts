@@ -3,10 +3,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { STORAGE_KEYS, storageGetItem, storageSetItem } from '@/lib/storage';
 import { AppSettings } from '@/types';
 
+export const DEFAULT_CURRENCY_SYMBOL = '₱';
+
 const DEFAULT_SETTINGS: AppSettings = {
   userName: 'You',
   currency: 'PHP',
-  currencySymbol: '₱',
+  currencySymbol: DEFAULT_CURRENCY_SYMBOL,
 };
 
 export function useSettings() {

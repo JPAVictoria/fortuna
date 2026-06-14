@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { Alert, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,7 +14,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useCategories } from '@/hooks/useExpenses';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useSavingsGoals } from '@/hooks/useSavings';
-import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
+import { DEFAULT_CURRENCY_SYMBOL, useSettings, useUpdateSettings } from '@/hooks/useSettings';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useToast } from '@/providers/ToastProvider';
 import { storageClear } from '@/lib/storage';
@@ -165,7 +166,7 @@ export default function SettingsScreen() {
           </Card>
         </View>
 
-        <Text style={[styles.version, { color: theme.textMuted }]}>Fortuna v1.0.0</Text>
+        <Text style={[styles.version, { color: theme.textMuted }]}>Fortuna v{Constants.expoConfig?.version ?? '1.0.0'}</Text>
 
       </ScrollView>
     </SafeAreaView>

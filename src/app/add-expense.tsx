@@ -9,7 +9,7 @@ import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAddExpense, useCategories } from '@/hooks/useExpenses';
 import { useHaptics } from '@/hooks/useHaptics';
-import { useSettings } from '@/hooks/useSettings';
+import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
 import { todayISO } from '@/lib/utils';
 
@@ -26,7 +26,7 @@ export default function AddExpenseModal() {
   const [notes, setNotes] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
-  const symbol = settings?.currencySymbol ?? '₱';
+  const symbol = settings?.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
 
   function handleSubmit() {
     const parsed = parseFloat(amount.replace(/,/g, ''));
@@ -100,7 +100,7 @@ export default function AddExpenseModal() {
             <Text>📅</Text>
             <Text style={[styles.dateLabel, { color: theme.textMuted }]}>Date</Text>
             <Text style={[styles.dateValue, { color: theme.text }]}>
-              {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              {new Date(todayISO()).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
             </Text>
           </View>
 

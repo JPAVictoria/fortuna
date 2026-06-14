@@ -1,5 +1,7 @@
 import { Category } from '@/types';
 
+export const FALLBACK_CATEGORY_COLOR = '#6B7280';
+
 export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'food', name: 'Food & Dining', icon: '🍽️', color: '#F59E0B', isDefault: true },
   { id: 'transport', name: 'Transport', icon: '🚗', color: '#60A5FA', isDefault: true },

@@ -11,7 +11,7 @@ import { CATEGORY_COLOR_SWATCHES } from '@/constants/categories';
 import { useTheme } from '@/hooks/use-theme';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useAddSavingsGoal } from '@/hooks/useSavings';
-import { useSettings } from '@/hooks/useSettings';
+import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
 import { formatDate } from '@/lib/utils';
 
@@ -31,7 +31,7 @@ export default function AddGoalModal() {
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const symbol = settings?.currencySymbol ?? '₱';
+  const symbol = settings?.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
 
   function handleSubmit() {
     const parsed = parseFloat(targetAmount.replace(/,/g, ''));

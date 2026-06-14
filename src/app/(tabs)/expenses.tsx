@@ -7,10 +7,11 @@ import { SwipeableRow } from '@/components/ui/SwipeableRow';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FAB } from '@/components/ui/FAB';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
+import { FALLBACK_CATEGORY_COLOR } from '@/constants/categories';
 import { useTheme } from '@/hooks/use-theme';
 import { useCategories, useCurrentMonthExpenses, useDeleteExpense } from '@/hooks/useExpenses';
 import { useHaptics } from '@/hooks/useHaptics';
-import { useSettings } from '@/hooks/useSettings';
+import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
 import { formatCurrency, formatDateShort, formatMonth, groupByDate, todayISO } from '@/lib/utils';
 import { Category, Expense } from '@/types';
@@ -27,7 +28,7 @@ export default function ExpensesScreen() {
   const [search, setSearch] = useState('');
   const [filterCategoryId, setFilterCategoryId] = useState<string>('');
 
-  const symbol = settings?.currencySymbol ?? '₱';
+  const symbol = settings?.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
 
   const filtered = expenses.filter(e => {
     const matchSearch = !search || e.description.toLowerCase().includes(search.toLowerCase());
@@ -120,7 +121,7 @@ export default function ExpensesScreen() {
             return (
               <SwipeableRow onDelete={() => handleDelete(item)}>
                 <View style={[styles.expenseRow, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
-                  <View style={[styles.iconWrap, { backgroundColor: (cat?.color ?? '#6B7280') + '22' }]}>
+                  <View style={[styles.iconWrap, { backgroundColor: (cat?.color ?? FALLBACK_CATEGORY_COLOR) + '22' }]}>
                     <Text style={styles.icon}>{cat?.icon ?? '📦'}</Text>
                   </View>
                   <View style={styles.info}>

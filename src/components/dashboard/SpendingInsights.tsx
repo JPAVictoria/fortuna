@@ -4,11 +4,12 @@ import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useCategories } from '@/hooks/useExpenses';
+import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { getCurrentMonthKey, getMonthKey, formatCurrency } from '@/lib/utils';
 
 type Insight = { icon: string; text: string; type: 'good' | 'warning' | 'info' };
 
-export function SpendingInsights({ currencySymbol = '₱' }: { currencySymbol?: string }) {
+export function SpendingInsights({ currencySymbol = DEFAULT_CURRENCY_SYMBOL }: { currencySymbol?: string }) {
   const theme = useTheme();
   const { data: expenses = [] } = useExpenses();
   const { data: categories = [] } = useCategories();

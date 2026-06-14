@@ -9,7 +9,7 @@ import { FAB } from '@/components/ui/FAB';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSavingsGoals, useTotalSaved } from '@/hooks/useSavings';
-import { useSettings } from '@/hooks/useSettings';
+import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
 import { useHaptics } from '@/hooks/useHaptics';
 import { formatCurrency } from '@/lib/utils';
 import { SavingsGoal } from '@/types';
@@ -20,7 +20,7 @@ export default function SavingsScreen() {
   const { total } = useTotalSaved();
   const { data: settings } = useSettings();
   const haptics = useHaptics();
-  const symbol = settings?.currencySymbol ?? '₱';
+  const symbol = settings?.currencySymbol ?? DEFAULT_CURRENCY_SYMBOL;
 
   const completed = goals.filter(g => g.currentAmount >= g.targetAmount);
   const active = goals.filter(g => g.currentAmount < g.targetAmount);

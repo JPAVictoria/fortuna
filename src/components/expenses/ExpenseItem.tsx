@@ -1,7 +1,9 @@
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { FontSize, Spacing } from '@/constants/theme';
+import { FALLBACK_CATEGORY_COLOR } from '@/constants/categories';
 import { useDeleteExpense } from '@/hooks/useExpenses';
+import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCurrency, formatDateShort } from '@/lib/utils';
 import { Category, Expense } from '@/types';
@@ -13,7 +15,7 @@ type Props = {
   currencySymbol?: string;
 };
 
-export function ExpenseItem({ expense, category, currencySymbol = '₱' }: Props) {
+export function ExpenseItem({ expense, category, currencySymbol = DEFAULT_CURRENCY_SYMBOL }: Props) {
   const theme = useTheme();
   const { mutate: deleteExpense } = useDeleteExpense();
 
@@ -32,7 +34,7 @@ export function ExpenseItem({ expense, category, currencySymbol = '₱' }: Props
     id: 'other',
     name: 'Other',
     icon: '📦',
-    color: '#6B7280',
+    color: FALLBACK_CATEGORY_COLOR,
     isDefault: true,
   };
 
