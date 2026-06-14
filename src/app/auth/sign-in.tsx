@@ -1,12 +1,14 @@
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,6 +33,8 @@ export default function SignInScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const canSubmit = email.trim().length > 0 && password.length > 0;
 
   async function handleSignIn() {
     setError('');
@@ -57,6 +61,7 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.kav}>
         <View style={styles.handleWrap}><View style={[styles.handle, { backgroundColor: theme.border }]} /></View>
 
@@ -118,6 +123,7 @@ export default function SignInScreen() {
             label="Sign In"
             onPress={handleSignIn}
             loading={loading}
+            disabled={!canSubmit}
             fullWidth
             size="lg"
             style={styles.btn}
@@ -125,16 +131,17 @@ export default function SignInScreen() {
 
           <View style={styles.switchRow}>
             <Text style={[styles.switchText, { color: theme.textMuted }]}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => router.replace('/auth/sign-up')}>
+            <TouchableOpacity onPress={() => router.replace('/auth/sign-up')} accessibilityLabel="Go to sign up">
               <Text style={[styles.switchLink, { color: theme.primary }]}>Sign Up</Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity onPress={() => router.back()} style={styles.skip}>
+          <TouchableOpacity onPress={() => { Keyboard.dismiss(); router.back(); }} style={styles.skip} accessibilityLabel="Use without account">
             <Text style={[styles.skipLabel, { color: theme.textMuted }]}>Use without account</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BalanceHeader } from '@/components/dashboard/BalanceHeader';
@@ -13,6 +13,7 @@ import { TopExpensesChart } from '@/components/dashboard/TopExpensesChart';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FortunaLogo } from '@/components/ui/FortunaLogo';
+import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useCategories, useCurrentMonthExpenses, useTopCategories } from '@/hooks/useExpenses';
@@ -44,8 +45,7 @@ export default function DashboardScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        onRefresh={refetch}
-        refreshing={isLoading}>
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}>
 
         {/* Header */}
         <View style={styles.header}>
@@ -58,16 +58,34 @@ export default function DashboardScreen() {
               <Text style={[styles.month, { color: theme.text }]}>{formatMonth(todayISO())}</Text>
             </View>
           </View>
-          <TouchableOpacity
-            onPress={() => router.push('/add-expense')}
-            style={[styles.quickAdd, { backgroundColor: theme.primaryDim, borderColor: theme.primary + '44' }]}>
-            <Text style={[styles.quickAddLabel, { color: theme.primary }]}>+ Log</Text>
-          </TouchableOpacity>
+          {!isLoading && (
+            <TouchableOpacity
+              onPress={() => router.push('/add-expense')}
+              accessibilityLabel="Log expense"
+              style={[styles.quickAdd, { backgroundColor: theme.primaryDim, borderColor: theme.primary + '44' }]}>
+              <Text style={[styles.quickAddLabel, { color: theme.primary }]}>+ Log</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Daily Quote */}
         <FortunaQuote />
 
+        {/* Skeleton while loading */}
+        {isLoading && (
+          <View style={styles.skeletonWrap}>
+            <SkeletonLoader height={100} borderRadius={14} />
+            <View style={styles.skeletonRow}>
+              <SkeletonLoader width="48%" height={80} borderRadius={12} />
+              <SkeletonLoader width="48%" height={80} borderRadius={12} />
+            </View>
+            <SkeletonLoader height={160} borderRadius={14} />
+            <SkeletonLoader height={120} borderRadius={14} />
+          </View>
+        )}
+
+        {!isLoading && (
+          <>
         {/* Balance Hero */}
         <BalanceHeader
           totalSpent={totalSpent}
@@ -80,13 +98,15 @@ export default function DashboardScreen() {
         <View style={styles.actions}>
           <TouchableOpacity
             style={[styles.actionBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
-            onPress={() => router.push('/add-expense')}>
+            onPress={() => router.push('/add-expense')}
+            accessibilityLabel="Add expense">
             <Text style={styles.actionIcon}>💸</Text>
             <Text style={[styles.actionLabel, { color: theme.text }]}>Add Expense</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionBtn, { backgroundColor: theme.surface, borderColor: theme.goldDim }]}
-            onPress={() => router.push('/add-goal')}>
+            onPress={() => router.push('/add-goal')}
+            accessibilityLabel="Save money">
             <Text style={styles.actionIcon}>🪙</Text>
             <Text style={[styles.actionLabel, { color: theme.text }]}>Save Money</Text>
           </TouchableOpacity>
@@ -161,12 +181,14 @@ export default function DashboardScreen() {
           </View>
         </Card>
 
-        {monthExpenses.length === 0 && !isLoading && (
+        {monthExpenses.length === 0 && (
           <EmptyState
             icon="🌱"
             title="Your fortune starts here"
             subtitle="Log your first expense to begin tracking your financial journey."
           />
+        )}
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -187,6 +209,8 @@ const styles = StyleSheet.create({
   actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.lg, borderWidth: 1 },
   actionIcon: { fontSize: 20 },
   actionLabel: { fontSize: FontSize.sm, fontWeight: '600' },
+  skeletonWrap: { gap: Spacing.sm },
+  skeletonRow: { flexDirection: 'row', gap: Spacing.sm },
   section: { gap: Spacing.sm },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sectionTitle: { fontSize: FontSize.lg, fontWeight: '700' },
