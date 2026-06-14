@@ -1,4 +1,5 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
@@ -70,8 +71,8 @@ export default function AddExpenseModal() {
 
         <View style={styles.titleRow}>
           <Text style={[styles.title, { color: theme.text }]}>Log Expense</Text>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={16}>
-            <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
+          <TouchableOpacity onPress={() => router.back()} hitSlop={16} accessibilityLabel="Close">
+            <Ionicons name="close" size={22} color={theme.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -101,8 +102,9 @@ export default function AddExpenseModal() {
             <Text style={[styles.label, { color: theme.textSecondary }]}>DATE</Text>
             <TouchableOpacity
               onPress={() => setShowDatePicker(true)}
+              accessibilityLabel={`Date: ${formatDate(date.toISOString())}`}
               style={[styles.dateRow, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
-              <Text>📅</Text>
+              <Ionicons name="calendar-outline" size={16} color={theme.textMuted} />
               <Text style={[styles.dateValue, { color: theme.text }]}>{formatDate(date.toISOString())}</Text>
             </TouchableOpacity>
           </View>
@@ -136,7 +138,6 @@ const styles = StyleSheet.create({
   handle: { width: 40, height: 4, borderRadius: 2 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: Spacing.md, paddingVertical: Spacing.md },
   title: { fontSize: FontSize.xl, fontWeight: '700' },
-  close: { fontSize: FontSize.lg },
   form: { paddingHorizontal: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxl },
   field: { gap: 8 },
   label: { fontSize: FontSize.sm, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.6 },

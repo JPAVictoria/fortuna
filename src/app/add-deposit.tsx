@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -65,7 +66,7 @@ export default function AddDepositModal() {
             ) : null}
           </View>
           <TouchableOpacity onPress={() => { Keyboard.dismiss(); router.back(); }} hitSlop={16} accessibilityLabel="Close">
-            <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
+            <Ionicons name="close" size={22} color={theme.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -119,7 +120,6 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: FontSize.xl, fontWeight: '700' },
   goalName: { fontSize: FontSize.sm, fontWeight: '600', marginTop: 2 },
-  close: { fontSize: FontSize.lg },
   form: {
     paddingHorizontal: Spacing.md,
     gap: Spacing.md,

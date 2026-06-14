@@ -1,4 +1,5 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
@@ -54,7 +55,7 @@ export default function AddGoalModal() {
         <View style={styles.titleRow}>
           <Text style={[styles.title, { color: theme.text }]}>New Savings Goal</Text>
           <TouchableOpacity onPress={() => { Keyboard.dismiss(); router.back(); }} hitSlop={16} accessibilityLabel="Close">
-            <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
+            <Ionicons name="close" size={22} color={theme.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -97,7 +98,7 @@ export default function AddGoalModal() {
               onPress={() => setShowDatePicker(true)}
               accessibilityLabel={deadline ? `Deadline: ${formatDate(deadline.toISOString())}` : 'Set deadline'}
               style={[styles.deadlineBtn, { backgroundColor: theme.backgroundElement, borderColor: deadline ? theme.primary : theme.border }]}>
-              <Text style={styles.calIcon}>📅</Text>
+              <Ionicons name="calendar-outline" size={16} color={deadline ? theme.primary : theme.textMuted} />
               <Text style={[styles.deadlineLabel, { color: deadline ? theme.text : theme.textMuted }]}>
                 {deadline ? formatDate(deadline.toISOString()) : 'No deadline set'}
               </Text>
@@ -144,7 +145,6 @@ const styles = StyleSheet.create({
   handle: { width: 40, height: 4, borderRadius: 2 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: Spacing.md, paddingVertical: Spacing.md },
   title: { fontSize: FontSize.xl, fontWeight: '700' },
-  close: { fontSize: FontSize.lg },
   form: { paddingHorizontal: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxl },
   field: { gap: 8 },
   label: { fontSize: FontSize.sm, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.6 },
@@ -156,7 +156,6 @@ const styles = StyleSheet.create({
   swatchActive: { borderWidth: 2, borderColor: '#FFFFFF' },
   swatchCheck: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
   deadlineBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.md, borderWidth: 1.5 },
-  calIcon: { fontSize: 16 },
   deadlineLabel: { flex: 1, fontSize: FontSize.md },
   clearDeadline: { fontSize: FontSize.md },
   preview: { borderRadius: BorderRadius.lg, borderWidth: 1.5, padding: Spacing.md, alignItems: 'center', gap: Spacing.xs },

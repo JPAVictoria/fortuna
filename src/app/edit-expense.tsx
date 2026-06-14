@@ -1,4 +1,5 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
@@ -129,7 +130,7 @@ export default function EditExpenseModal() {
               hitSlop={16}
               accessibilityLabel="Close"
             >
-              <Text style={[styles.close, { color: theme.textMuted }]}>✕</Text>
+              <Ionicons name="close" size={22} color={theme.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -206,6 +207,7 @@ export default function EditExpenseModal() {
               </Text>
               <TouchableOpacity
                 onPress={() => setShowDatePicker(true)}
+                accessibilityLabel={`Date: ${formatDate(date.toISOString())}`}
                 style={[
                   styles.dateRow,
                   {
@@ -214,7 +216,7 @@ export default function EditExpenseModal() {
                   },
                 ]}
               >
-                <Text>📅</Text>
+                <Ionicons name="calendar-outline" size={16} color={theme.textMuted} />
                 <Text style={[styles.dateValue, { color: theme.text }]}>
                   {formatDate(date.toISOString())}
                 </Text>
@@ -270,7 +272,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   title: { fontSize: FontSize.xl, fontWeight: "700" },
-  close: { fontSize: FontSize.lg },
   form: {
     paddingHorizontal: Spacing.md,
     gap: Spacing.md,
