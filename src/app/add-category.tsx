@@ -20,6 +20,7 @@ import { CATEGORY_COLOR_SWATCHES } from '@/constants/categories';
 import { CATEGORY_ICONS } from '@/constants/icons';
 import { useTheme } from '@/hooks/use-theme';
 import { useAddCategory } from '@/hooks/useExpenses';
+import { formatAmountInput } from '@/lib/utils';
 
 export default function AddCategoryModal() {
   const theme = useTheme();
@@ -29,6 +30,7 @@ export default function AddCategoryModal() {
   const [icon, setIcon] = useState(CATEGORY_ICONS[0]);
   const [customIcon, setCustomIcon] = useState('');
   const [selectedColor, setSelectedColor] = useState(CATEGORY_COLOR_SWATCHES[0]);
+  const [monthlyBudget, setMonthlyBudget] = useState('');
 
   const resolvedIcon = customIcon.trim() || icon;
 
@@ -38,8 +40,9 @@ export default function AddCategoryModal() {
       return;
     }
 
+    const budget = parseFloat(monthlyBudget.replace(/,/g, ''));
     addCategory(
-      { name: name.trim(), icon: resolvedIcon, color: selectedColor },
+      { name: name.trim(), icon: resolvedIcon, color: selectedColor, monthlyBudget: budget > 0 ? budget : undefined },
       { onSuccess: () => router.back() }
     );
   }
@@ -129,6 +132,16 @@ export default function AddCategoryModal() {
               ))}
             </View>
           </View>
+
+          <Input
+            label="Monthly Budget (optional)"
+            prefix="₱"
+            placeholder="0.00"
+            value={monthlyBudget}
+            onChangeText={v => setMonthlyBudget(formatAmountInput(v))}
+            keyboardType="decimal-pad"
+            returnKeyType="done"
+          />
 
           <Button
             label="Create Category"

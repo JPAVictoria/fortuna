@@ -24,6 +24,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useUpdateCategory } from '@/hooks/useExpenses';
 import { useToast } from '@/providers/ToastProvider';
+import { formatAmountInput } from '@/lib/utils';
 
 export default function EditCategoryModal() {
   const theme = useTheme();
@@ -37,6 +38,7 @@ export default function EditCategoryModal() {
     icon: string;
     color: string;
     isDefault: string;
+    monthlyBudget: string;
   }>();
 
   const isDefault = params.isDefault === 'true';
@@ -45,6 +47,7 @@ export default function EditCategoryModal() {
   const [icon, setIcon] = useState(params.icon ?? CATEGORY_ICONS[0]);
   const [customIcon, setCustomIcon] = useState('');
   const [selectedColor, setSelectedColor] = useState(params.color ?? CATEGORY_COLOR_SWATCHES[0]);
+  const [monthlyBudget, setMonthlyBudget] = useState(params.monthlyBudget ? formatAmountInput(params.monthlyBudget) : '');
 
   const resolvedIcon = customIcon.trim() || icon;
   const canSubmit = isDefault || name.trim().length > 0;
@@ -55,6 +58,7 @@ export default function EditCategoryModal() {
       return;
     }
 
+    const budget = parseFloat(monthlyBudget.replace(/,/g, ''));
     updateCategory(
       {
         id: params.id,
@@ -62,6 +66,7 @@ export default function EditCategoryModal() {
         icon: resolvedIcon,
         color: selectedColor,
         isDefault,
+        monthlyBudget: budget > 0 ? budget : undefined,
       },
       {
         onSuccess: () => { haptics.success(); toast('Category updated!'); router.back(); },
@@ -149,6 +154,16 @@ export default function EditCategoryModal() {
               ))}
             </View>
           </View>
+
+          <Input
+            label="Monthly Budget (optional)"
+            prefix="₱"
+            placeholder="0.00"
+            value={monthlyBudget}
+            onChangeText={v => setMonthlyBudget(formatAmountInput(v))}
+            keyboardType="decimal-pad"
+            returnKeyType="done"
+          />
 
           <Button label="Save Changes" onPress={handleSubmit} loading={isPending} disabled={!canSubmit} fullWidth size="lg" style={styles.submit} />
         </ScrollView>

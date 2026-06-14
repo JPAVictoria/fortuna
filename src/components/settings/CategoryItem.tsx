@@ -21,6 +21,7 @@ export function CategoryItem({ category }: Props) {
         icon: category.icon,
         color: category.color,
         isDefault: String(category.isDefault),
+        monthlyBudget: category.monthlyBudget ? String(category.monthlyBudget) : '',
       },
     });
   }

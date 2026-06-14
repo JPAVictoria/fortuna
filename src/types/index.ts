@@ -4,6 +4,7 @@ export type Category = {
   icon: string;
   color: string;
   isDefault: boolean;
+  monthlyBudget?: number;
 };
 
 export type Expense = {
@@ -13,6 +14,26 @@ export type Expense = {
   categoryId: string;
   date: string;
   notes?: string;
+  photoUri?: string;
+};
+
+export type Income = {
+  id: string;
+  amount: number;
+  source: string;
+  date: string;
+  notes?: string;
+};
+
+export type RecurringExpense = {
+  id: string;
+  amount: number;
+  description: string;
+  categoryId: string;
+  frequency: 'daily' | 'weekly' | 'monthly';
+  nextDue: string;
+  notes?: string;
+  active: boolean;
 };
 
 export type SavingsGoal = {
