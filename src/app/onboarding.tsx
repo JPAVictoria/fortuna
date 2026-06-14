@@ -11,6 +11,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useUpdateSettings } from '@/hooks/useSettings';
 import { useAddSavingsGoal } from '@/hooks/useSavings';
+import { storageSetItem, STORAGE_KEYS } from '@/lib/storage';
 
 const STEPS = ['welcome', 'profile', 'goal'] as const;
 type Step = typeof STEPS[number];
@@ -32,7 +33,7 @@ export default function OnboardingScreen() {
     if (idx < STEPS.length - 1) setStep(STEPS[idx + 1]);
   }
 
-  function finish() {
+  async function finish() {
     haptics.success();
     updateSettings({ userName: name.trim() || 'You' });
 
@@ -40,6 +41,7 @@ export default function OnboardingScreen() {
       addGoal({ name: goalName.trim(), targetAmount: parseFloat(goalAmount), icon: '🏆', color: '#F59E0B' });
     }
 
+    await storageSetItem(STORAGE_KEYS.ONBOARDED, true);
     router.replace('/(tabs)');
   }
 

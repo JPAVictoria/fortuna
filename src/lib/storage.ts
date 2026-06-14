@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   SAVINGS_GOALS: 'fortuna:savings_goals',
   SAVINGS_DEPOSITS: 'fortuna:savings_deposits',
   SETTINGS: 'fortuna:settings',
+  ONBOARDED: 'fortuna:onboarded',
 } as const;
 
 export async function storageGetList<T>(key: string): Promise<T[]> {
