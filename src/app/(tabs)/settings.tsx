@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CategoryItem } from '@/components/settings/CategoryItem';
 import { Card } from '@/components/ui/Card';
+import { FortunaLogo } from '@/components/ui/FortunaLogo';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useCategories } from '@/hooks/useExpenses';
@@ -48,7 +49,10 @@ export default function SettingsScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-        <Text style={[styles.pageTitle, { color: theme.text }]}>Settings</Text>
+        <View style={styles.pageHeader}>
+          <FortunaLogo size={36} />
+          <Text style={[styles.pageTitle, { color: theme.text }]}>Settings</Text>
+        </View>
 
         {/* Profile */}
         <View style={styles.section}>
@@ -158,6 +162,7 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingBottom: Spacing.xxxl,
   },
+  pageHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   pageTitle: { fontSize: FontSize.xxl, fontWeight: '700' },
   section: { gap: Spacing.sm },
   sectionLabel: {

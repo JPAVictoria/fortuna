@@ -7,6 +7,7 @@ import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { TopExpensesChart } from '@/components/dashboard/TopExpensesChart';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { FortunaLogo } from '@/components/ui/FortunaLogo';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useCategories, useCurrentMonthExpenses, useTopCategories } from '@/hooks/useExpenses';
@@ -37,13 +38,16 @@ export default function DashboardScreen() {
 
         {/* Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={[styles.greeting, { color: theme.textSecondary }]}>
-              {getGreeting()}, {name}
-            </Text>
-            <Text style={[styles.month, { color: theme.text }]}>
-              {formatMonth(todayISO())}
-            </Text>
+          <View style={styles.headerLeft}>
+            <FortunaLogo size={40} />
+            <View>
+              <Text style={[styles.greeting, { color: theme.textSecondary }]}>
+                {getGreeting()}, {name}
+              </Text>
+              <Text style={[styles.month, { color: theme.text }]}>
+                {formatMonth(todayISO())}
+              </Text>
+            </View>
           </View>
           <TouchableOpacity
             onPress={() => router.push('/add-expense')}
@@ -129,8 +133,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
   greeting: { fontSize: FontSize.sm, fontWeight: '600' },
-  month: { fontSize: FontSize.xxl, fontWeight: '700', marginTop: 2 },
+  month: { fontSize: FontSize.lg, fontWeight: '700', marginTop: 1 },
   quickAdd: {
     paddingHorizontal: Spacing.md,
     paddingVertical: 8,

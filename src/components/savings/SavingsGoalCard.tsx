@@ -52,7 +52,7 @@ export function SavingsGoalCard({ goal, onDeposit, currencySymbol = '₱' }: Pro
             </Text>
           )}
         </View>
-        {isComplete && <Text style={styles.done}>✓ Done</Text>}
+        {isComplete && <Text style={[styles.done, { color: theme.primary }]}>✓ Done</Text>}
       </View>
 
       <ProgressBar progress={progress} color={goal.color} height={7} />
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   nameWrap: { flex: 1 },
   name: { fontSize: FontSize.lg, fontWeight: '600' },
   deadline: { fontSize: FontSize.sm, marginTop: 1 },
-  done: { fontSize: FontSize.sm, color: '#10B981', fontWeight: '700' },
+  done: { fontSize: FontSize.sm, fontWeight: '700' },
   amounts: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.xs },
   current: { fontSize: FontSize.xl, fontWeight: '700' },
   target: { fontSize: FontSize.md },
