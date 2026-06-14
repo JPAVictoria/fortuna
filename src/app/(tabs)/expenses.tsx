@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, SectionList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -6,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SwipeableRow } from '@/components/ui/SwipeableRow';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FAB } from '@/components/ui/FAB';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SkeletonCard } from '@/components/ui/SkeletonLoader';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { FALLBACK_CATEGORY_COLOR } from '@/constants/categories';
@@ -27,6 +29,8 @@ export default function ExpensesScreen() {
   const [search, setSearch] = useState('');
   const [filterCategoryId, setFilterCategoryId] = useState<string>('');
   const [monthOffset, setMonthOffset] = useState(0);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const undoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const monthKey = getMonthKeyByOffset(monthOffset);
@@ -54,7 +58,31 @@ export default function ExpensesScreen() {
     toast('Expense deleted', { type: 'info', undoLabel: 'Undo', onUndo: () => { if (undoRef.current) clearTimeout(undoRef.current); } });
   }
 
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function handleBulkDelete() {
+    haptics.warning();
+    Alert.alert(`Delete ${selectedIds.size} expense${selectedIds.size > 1 ? 's' : ''}?`, 'This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive', onPress: () => {
+          selectedIds.forEach(id => deleteExpense(id));
+          setSelectedIds(new Set());
+          setSelectMode(false);
+          toast(`Deleted ${selectedIds.size} expense${selectedIds.size > 1 ? 's' : ''}`);
+        },
+      },
+    ]);
+  }
+
   function handleLongPress(expense: Expense) {
+    if (selectMode) { toggleSelect(expense.id); return; }
     haptics.medium();
     Alert.alert(expense.description, undefined, [
       {
@@ -83,6 +111,16 @@ export default function ExpensesScreen() {
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
         <Text style={[styles.title, { color: theme.text }]}>Expenses</Text>
         <View style={styles.monthSelector}>
+          {!selectMode && (
+            <TouchableOpacity onPress={() => setSelectMode(true)} hitSlop={12} accessibilityLabel="Select expenses" style={styles.selectBtn}>
+              <Text style={[styles.selectBtnLabel, { color: theme.primary }]}>Select</Text>
+            </TouchableOpacity>
+          )}
+          {selectMode && (
+            <TouchableOpacity onPress={() => { setSelectMode(false); setSelectedIds(new Set()); }} hitSlop={12} accessibilityLabel="Cancel selection">
+              <Text style={[styles.selectBtnLabel, { color: theme.error }]}>Cancel</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity onPress={() => setMonthOffset(o => o - 1)} hitSlop={12} accessibilityLabel="Previous month">
             <Text style={[styles.arrow, { color: theme.primary }]}>‹</Text>
           </TouchableOpacity>
@@ -134,6 +172,26 @@ export default function ExpensesScreen() {
                 </Text>
               </View>
 
+              {/* Category budget bar */}
+              {filterCategoryId && (() => {
+                const filteredCat = categories.find(c => c.id === filterCategoryId);
+                if (!filteredCat?.monthlyBudget) return null;
+                const pct = Math.min(total / filteredCat.monthlyBudget, 1);
+                const over = total > filteredCat.monthlyBudget;
+                return (
+                  <View style={[styles.budgetCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                    <View style={styles.budgetInfo}>
+                      <Text style={[styles.budgetLabel, { color: theme.textSecondary }]}>MONTHLY BUDGET</Text>
+                      <Text style={[styles.budgetAmt, { color: over ? theme.error : theme.primary }]}>
+                        {formatCurrency(total, symbol)} / {formatCurrency(filteredCat.monthlyBudget, symbol)}
+                      </Text>
+                    </View>
+                    <ProgressBar progress={pct} color={over ? theme.error : (filteredCat.color ?? theme.primary)} height={6} />
+                    {over && <Text style={[styles.overBudget, { color: theme.error }]}>Over budget by {formatCurrency(total - filteredCat.monthlyBudget, symbol)}</Text>}
+                  </View>
+                );
+              })()}
+
               {/* Category filter — horizontal scroll */}
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
                 <TouchableOpacity
@@ -156,23 +214,32 @@ export default function ExpensesScreen() {
           keyExtractor={item => item.id}
           renderItem={({ item }) => {
             const cat = categories.find(c => c.id === item.categoryId);
-            return (
-              <SwipeableRow onDelete={() => deleteWithUndo(item)}>
-                <TouchableOpacity
-                  onLongPress={() => handleLongPress(item)}
-                  activeOpacity={0.85}
-                  style={[styles.expenseRow, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
-                  <View style={[styles.iconWrap, { backgroundColor: (cat?.color ?? FALLBACK_CATEGORY_COLOR) + '22' }]}>
-                    <Text style={styles.icon}>{cat?.icon ?? '📦'}</Text>
+            const isSelected = selectedIds.has(item.id);
+            const row = (
+              <TouchableOpacity
+                onPress={() => selectMode ? toggleSelect(item.id) : undefined}
+                onLongPress={() => handleLongPress(item)}
+                activeOpacity={0.85}
+                style={[styles.expenseRow, { backgroundColor: isSelected ? theme.primaryDim : theme.background, borderBottomColor: theme.border }]}>
+                {selectMode && (
+                  <View style={[styles.checkbox, { borderColor: isSelected ? theme.primary : theme.border, backgroundColor: isSelected ? theme.primary : 'transparent' }]}>
+                    {isSelected && <Ionicons name="checkmark" size={12} color="#fff" />}
                   </View>
-                  <View style={styles.info}>
-                    <Text style={[styles.desc, { color: theme.text }]} numberOfLines={1}>{item.description}</Text>
+                )}
+                <View style={[styles.iconWrap, { backgroundColor: (cat?.color ?? FALLBACK_CATEGORY_COLOR) + '22' }]}>
+                  <Text style={styles.icon}>{cat?.icon ?? '📦'}</Text>
+                </View>
+                <View style={styles.info}>
+                  <Text style={[styles.desc, { color: theme.text }]} numberOfLines={1}>{item.description}</Text>
+                  <View style={styles.metaRow}>
                     <Text style={[styles.meta, { color: theme.textMuted }]}>{cat?.name ?? 'Other'} · {formatDateShort(item.date)}</Text>
+                    {item.photoUri ? <Ionicons name="image-outline" size={12} color={theme.textMuted} /> : null}
                   </View>
-                  <Text style={[styles.amount, { color: theme.error }]}>-{formatCurrency(item.amount, symbol)}</Text>
-                </TouchableOpacity>
-              </SwipeableRow>
+                </View>
+                <Text style={[styles.amount, { color: theme.error }]}>-{formatCurrency(item.amount, symbol)}</Text>
+              </TouchableOpacity>
             );
+            return selectMode ? row : <SwipeableRow onDelete={() => deleteWithUndo(item)}>{row}</SwipeableRow>;
           }}
           renderSectionHeader={({ section }) => (
             <View style={[styles.sectionHeader, { backgroundColor: theme.backgroundElement }]}>
@@ -200,7 +267,15 @@ export default function ExpensesScreen() {
         />
       )}
 
-      {!isLoading && <FAB onPress={() => { haptics.light(); router.push('/add-expense'); }} accessibilityLabel="Log expense" />}
+      {!isLoading && !selectMode && <FAB onPress={() => { haptics.light(); router.push('/add-expense'); }} accessibilityLabel="Log expense" />}
+      {selectMode && selectedIds.size > 0 && (
+        <View style={[styles.bulkBar, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
+          <Text style={[styles.bulkCount, { color: theme.text }]}>{selectedIds.size} selected</Text>
+          <TouchableOpacity onPress={handleBulkDelete} style={[styles.bulkDelete, { backgroundColor: theme.error }]} accessibilityLabel="Delete selected">
+            <Text style={styles.bulkDeleteLabel}>Delete {selectedIds.size}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -228,13 +303,26 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: FontSize.sm, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
   sectionSubtotal: { fontSize: FontSize.sm, fontWeight: '600' },
   listContent: { paddingBottom: 120 },
+  selectBtn: { paddingHorizontal: 8, paddingVertical: 2 },
+  selectBtnLabel: { fontSize: FontSize.sm, fontWeight: '600' },
+  budgetCard: { marginHorizontal: Spacing.md, marginBottom: Spacing.xs, padding: Spacing.md, borderRadius: BorderRadius.lg, borderWidth: 1, gap: Spacing.xs },
+  budgetInfo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  budgetLabel: { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 0.8 },
+  budgetAmt: { fontSize: FontSize.sm, fontWeight: '700' },
+  overBudget: { fontSize: FontSize.xs, fontWeight: '600' },
   expenseRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.md, paddingHorizontal: Spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, gap: Spacing.sm },
+  checkbox: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   iconWrap: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   icon: { fontSize: 18 },
   info: { flex: 1, gap: 2 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   desc: { fontSize: FontSize.md, fontWeight: '500' },
   meta: { fontSize: FontSize.sm },
   amount: { fontSize: FontSize.md, fontWeight: '700' },
+  bulkBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, borderTopWidth: 1 },
+  bulkCount: { fontSize: FontSize.md, fontWeight: '600' },
+  bulkDelete: { paddingHorizontal: Spacing.md, paddingVertical: 8, borderRadius: BorderRadius.md },
+  bulkDeleteLabel: { color: '#fff', fontSize: FontSize.sm, fontWeight: '700' },
   emptySearch: { alignItems: 'center', paddingTop: Spacing.xxl, gap: Spacing.md },
   emptySearchText: { fontSize: FontSize.md },
   clearSearchBtn: { paddingHorizontal: Spacing.lg, paddingVertical: 10, borderRadius: BorderRadius.full, borderWidth: 1.5 },
