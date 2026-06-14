@@ -1,6 +1,6 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
@@ -27,6 +27,23 @@ export function SavingsGoalCard({ goal, onDeposit, currencySymbol = DEFAULT_CURR
   const isComplete = progress >= 1;
   const days = goal.deadline ? daysUntil(goal.deadline) : null;
   const projected = !isComplete ? projectCompletionDate(goal.currentAmount, goal.targetAmount, goal.createdAt) : null;
+
+  const trophyScale = useRef(new Animated.Value(isComplete ? 1 : 0)).current;
+  const trophyOpacity = useRef(new Animated.Value(isComplete ? 1 : 0)).current;
+  const wasComplete = useRef(isComplete);
+
+  useEffect(() => {
+    if (isComplete && !wasComplete.current) {
+      Animated.parallel([
+        Animated.spring(trophyScale, { toValue: 1, useNativeDriver: true, bounciness: 14 }),
+        Animated.timing(trophyOpacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+      ]).start();
+    } else if (isComplete && wasComplete.current) {
+      trophyScale.setValue(1);
+      trophyOpacity.setValue(1);
+    }
+    wasComplete.current = isComplete;
+  }, [isComplete, trophyScale, trophyOpacity]);
 
   function handleLongPress() {
     Alert.alert(goal.name, undefined, [
@@ -93,7 +110,11 @@ export function SavingsGoalCard({ goal, onDeposit, currencySymbol = DEFAULT_CURR
           )}
         </View>
         <Text style={[styles.expandChevron, { color: theme.textMuted }]}>{expanded ? '▲' : '▼'}</Text>
-        {isComplete && <Text style={[styles.done, { color: theme.primary }]}>✓ Done</Text>}
+        {isComplete && (
+          <Animated.View style={[styles.trophyBadge, { backgroundColor: goal.color + '22', transform: [{ scale: trophyScale }], opacity: trophyOpacity }]}>
+            <Text style={styles.trophyIcon}>🏆</Text>
+          </Animated.View>
+        )}
       </View>
 
       <ProgressBar progress={progress} color={goal.color} height={7} />
@@ -168,7 +189,8 @@ const styles = StyleSheet.create({
   name: { fontSize: FontSize.lg, fontWeight: '600' },
   deadline: { fontSize: FontSize.sm, marginTop: 1 },
   expandChevron: { fontSize: FontSize.xs },
-  done: { fontSize: FontSize.sm, fontWeight: '700' },
+  trophyBadge: { borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, alignItems: 'center', justifyContent: 'center' },
+  trophyIcon: { fontSize: 18 },
   amounts: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.xs },
   current: { fontSize: FontSize.xl, fontWeight: '700' },
   target: { fontSize: FontSize.md },

@@ -1,8 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Tabs, usePathname } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
 import { Colors, FontSize } from '@/constants/theme';
+
+const MODAL_PREFIXES = ['/add-', '/edit-', '/auth/'];
+function isModalRoute(path: string) {
+  return MODAL_PREFIXES.some(p => path.startsWith(p));
+}
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -16,6 +21,8 @@ const TAB_CONFIG: Record<string, { label: string; icon: IoniconName; iconFocused
 export default function TabLayout() {
   const scheme = useColorScheme();
   const theme = Colors[scheme === 'dark' ? 'dark' : 'light'];
+  const pathname = usePathname();
+  const modalOpen = isModalRoute(pathname);
 
   return (
     <Tabs
@@ -25,7 +32,9 @@ export default function TabLayout() {
           headerShown: false,
           tabBarActiveTintColor: theme.tabActive,
           tabBarInactiveTintColor: theme.tabInactive,
-          tabBarStyle: {
+          tabBarStyle: modalOpen
+            ? { display: 'none' }
+            : {
             backgroundColor: theme.tabBar,
             borderTopColor: theme.tabBarBorder,
             borderTopWidth: 1,
