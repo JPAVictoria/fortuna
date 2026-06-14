@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Alert, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
@@ -12,15 +12,13 @@ import { Card } from '@/components/ui/Card';
 import { FortunaLogo } from '@/components/ui/FortunaLogo';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { useCategories } from '@/hooks/useExpenses';
-import { useExpenses } from '@/hooks/useExpenses';
-import { useSavingsGoals } from '@/hooks/useSavings';
+import { useCategories, useExpenses } from '@/hooks/useExpenses';
 import { DEFAULT_CURRENCY_SYMBOL, useSettings, useUpdateSettings } from '@/hooks/useSettings';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useToast } from '@/providers/ToastProvider';
 import { storageClear } from '@/lib/storage';
 import { formatDate } from '@/lib/utils';
-
+import { supabase } from '@/lib/supabase';
 
 export default function SettingsScreen() {
   const theme = useTheme();
@@ -28,10 +26,17 @@ export default function SettingsScreen() {
   const { mutate: updateSettings } = useUpdateSettings();
   const { data: categories = [] } = useCategories();
   const { data: expenses = [] } = useExpenses();
-  const { data: goals = [] } = useSavingsGoals();
   const qc = useQueryClient();
   const haptics = useHaptics();
   const toast = useToast();
+
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setUserEmail(data.session?.user.email ?? null);
+    });
+  }, []);
 
   async function handleExportCSV() {
     try {
@@ -47,6 +52,7 @@ export default function SettingsScreen() {
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(path, { mimeType: 'text/csv', dialogTitle: 'Export Fortuna Data' });
+        toast(`Exported ${expenses.length} expenses`);
       } else {
         toast('Export not available on this device', 'error');
       }
@@ -57,7 +63,6 @@ export default function SettingsScreen() {
 
   function handleClearData() {
     haptics.warning();
-    let deleteInput = '';
     Alert.prompt(
       'Clear All Data',
       'Type DELETE to confirm permanently deleting all expenses, goals, and categories.',
@@ -83,6 +88,14 @@ export default function SettingsScreen() {
     );
   }
 
+  async function handleSignOut() {
+    haptics.medium();
+    await supabase.auth.signOut();
+    setUserEmail(null);
+    toast('Signed out');
+    router.replace('/auth/sign-in');
+  }
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -90,6 +103,34 @@ export default function SettingsScreen() {
         <View style={styles.pageHeader}>
           <FortunaLogo size={36} />
           <Text style={[styles.pageTitle, { color: theme.text }]}>Settings</Text>
+        </View>
+
+        {/* Account */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>ACCOUNT</Text>
+          <Card padded={false}>
+            <View style={[styles.row, { borderBottomColor: theme.border, borderBottomWidth: StyleSheet.hairlineWidth }]}>
+              <Text style={[styles.rowLabel, { color: theme.text }]}>Signed in as</Text>
+              <Text style={[styles.emailText, { color: userEmail ? theme.primary : theme.textMuted }]} numberOfLines={1}>
+                {userEmail ?? 'Not signed in'}
+              </Text>
+            </View>
+            {userEmail ? (
+              <TouchableOpacity
+                style={styles.row}
+                onPress={handleSignOut}
+                accessibilityLabel="Sign out">
+                <Text style={[styles.rowLabel, { color: theme.error }]}>Sign Out</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.row}
+                onPress={() => router.push('/auth/sign-in')}
+                accessibilityLabel="Sign in">
+                <Text style={[styles.rowLabel, { color: theme.primary }]}>Sign In</Text>
+              </TouchableOpacity>
+            )}
+          </Card>
         </View>
 
         {/* Profile */}
@@ -105,6 +146,7 @@ export default function SettingsScreen() {
                 placeholder="Your name"
                 placeholderTextColor={theme.textMuted}
                 returnKeyType="done"
+                autoCorrect={false}
               />
             </View>
             <View style={styles.row}>
@@ -130,7 +172,8 @@ export default function SettingsScreen() {
           </Card>
           <TouchableOpacity
             style={[styles.addCatBtn, { borderColor: theme.primary, backgroundColor: theme.primaryDim }]}
-            onPress={() => { haptics.light(); router.push('/add-category'); }}>
+            onPress={() => { haptics.light(); router.push('/add-category'); }}
+            accessibilityLabel="Add category">
             <Text style={[styles.addCatLabel, { color: theme.primary }]}>+ Add Category</Text>
           </TouchableOpacity>
         </View>
@@ -139,14 +182,20 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>DATA</Text>
           <Card padded={false}>
-            <TouchableOpacity style={[styles.dataRow, { borderBottomColor: theme.border, borderBottomWidth: StyleSheet.hairlineWidth }]} onPress={handleExportCSV}>
+            <TouchableOpacity
+              style={[styles.dataRow, { borderBottomColor: theme.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
+              onPress={handleExportCSV}
+              accessibilityLabel="Export expenses as CSV">
               <Text style={styles.dataIcon}>📤</Text>
               <View style={styles.dataInfo}>
                 <Text style={[styles.dataLabel, { color: theme.text }]}>Export Expenses as CSV</Text>
                 <Text style={[styles.dataDesc, { color: theme.textMuted }]}>{expenses.length} expenses ready to export</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.dataRow} onPress={handleClearData}>
+            <TouchableOpacity
+              style={styles.dataRow}
+              onPress={handleClearData}
+              accessibilityLabel="Clear all data">
               <Text style={styles.dataIcon}>🗑️</Text>
               <View style={styles.dataInfo}>
                 <Text style={[styles.dataLabel, { color: theme.error }]}>Clear All Data</Text>
@@ -156,7 +205,24 @@ export default function SettingsScreen() {
           </Card>
         </View>
 
-        <Text style={[styles.version, { color: theme.textMuted }]}>Fortuna v{Constants.expoConfig?.version ?? '1.0.0'}</Text>
+        {/* About */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>ABOUT</Text>
+          <Card padded={false}>
+            <View style={[styles.row, { borderBottomColor: theme.border, borderBottomWidth: StyleSheet.hairlineWidth }]}>
+              <Text style={[styles.rowLabel, { color: theme.text }]}>Version</Text>
+              <Text style={[styles.valueText, { color: theme.textMuted }]}>
+                {Constants.expoConfig?.version ?? '1.0.0'}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={[styles.rowLabel, { color: theme.text }]}>Privacy Policy</Text>
+              <Text style={[styles.valueText, { color: theme.textMuted }]}>Coming soon</Text>
+            </View>
+          </Card>
+        </View>
+
+        <Text style={[styles.tagline, { color: theme.textMuted }]}>Fortuna favet fortibus.</Text>
 
       </ScrollView>
     </SafeAreaView>
@@ -173,6 +239,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.md, paddingVertical: 14 },
   rowLabel: { fontSize: FontSize.md, fontWeight: '500', flex: 1 },
   input: { fontSize: FontSize.md, textAlign: 'right', flex: 1 },
+  emailText: { fontSize: FontSize.sm, fontWeight: '500', flex: 1, textAlign: 'right' },
+  valueText: { fontSize: FontSize.sm },
   addCatBtn: { paddingVertical: 12, borderRadius: BorderRadius.md, borderWidth: 1.5, alignItems: 'center', borderStyle: 'dashed' },
   addCatLabel: { fontSize: FontSize.sm, fontWeight: '700' },
   dataRow: { flexDirection: 'row', alignItems: 'center', padding: Spacing.md, gap: Spacing.sm },
@@ -180,5 +248,5 @@ const styles = StyleSheet.create({
   dataInfo: { flex: 1, gap: 2 },
   dataLabel: { fontSize: FontSize.md, fontWeight: '600' },
   dataDesc: { fontSize: FontSize.sm },
-  version: { fontSize: FontSize.xs, textAlign: 'center', paddingVertical: Spacing.lg },
+  tagline: { fontSize: FontSize.xs, textAlign: 'center', paddingVertical: Spacing.lg, fontStyle: 'italic' },
 });
