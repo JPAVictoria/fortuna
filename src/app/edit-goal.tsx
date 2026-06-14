@@ -8,14 +8,13 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { CATEGORY_COLOR_SWATCHES } from '@/constants/categories';
+import { GOAL_ICONS } from '@/constants/icons';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useTheme } from '@/hooks/use-theme';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useUpdateSavingsGoal } from '@/hooks/useSavings';
 import { useToast } from '@/providers/ToastProvider';
 import { formatAmountInput, formatDate } from '@/lib/utils';
-
-const GOAL_ICONS = ['🏠', '✈️', '🚗', '💻', '📱', '🎓', '💍', '🏋️', '🌏', '🛡️', '🎸', '🍀'];
 
 export default function EditGoalModal() {
   const theme = useTheme();

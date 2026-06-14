@@ -101,6 +101,26 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
+export function getMonthKeyByOffset(offset: number): string {
+  const now = new Date(todayISO());
+  const d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export function formatMonthKey(key: string): string {
+  const [y, m] = key.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+export type PasswordStrength = { label: string; color: string; score: number };
+
+export function getPasswordStrength(pw: string): PasswordStrength {
+  if (pw.length === 0) return { label: '', color: 'transparent', score: 0 };
+  if (pw.length < 6) return { label: 'Weak', color: '#F87171', score: 1 };
+  if (pw.length < 10 || !/[0-9]/.test(pw)) return { label: 'Fair', color: '#F59E0B', score: 2 };
+  return { label: 'Strong', color: '#10B981', score: 3 };
+}
+
 export function formatAmountInput(raw: string): string {
   const stripped = raw.replace(/[^0-9.]/g, '');
   const parts = stripped.split('.');

@@ -16,17 +16,16 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { CATEGORY_COLOR_SWATCHES } from '@/constants/categories';
+import { CATEGORY_ICONS } from '@/constants/icons';
 import { useTheme } from '@/hooks/use-theme';
 import { useAddCategory } from '@/hooks/useExpenses';
-
-const SUGGESTED_ICONS = ['🎯', '🏖️', '🎮', '🐾', '🍕', '☕', '🎨', '🏆', '💼', '🔧', '🌿', '💰'];
 
 export default function AddCategoryModal() {
   const theme = useTheme();
   const { mutate: addCategory, isPending } = useAddCategory();
 
   const [name, setName] = useState('');
-  const [icon, setIcon] = useState('🎯');
+  const [icon, setIcon] = useState(CATEGORY_ICONS[0]);
   const [customIcon, setCustomIcon] = useState('');
   const [selectedColor, setSelectedColor] = useState(CATEGORY_COLOR_SWATCHES[0]);
 
@@ -83,7 +82,7 @@ export default function AddCategoryModal() {
           <View style={styles.field}>
             <Text style={[styles.label, { color: theme.textSecondary }]}>ICON</Text>
             <View style={styles.iconGrid}>
-              {SUGGESTED_ICONS.map((i) => (
+              {CATEGORY_ICONS.map((i) => (
                 <TouchableOpacity
                   key={i}
                   onPress={() => { setIcon(i); setCustomIcon(''); }}
