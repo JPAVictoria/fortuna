@@ -14,19 +14,8 @@ import { useCategories, useExpensesByMonth, useDeleteExpense } from '@/hooks/use
 import { useHaptics } from '@/hooks/useHaptics';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
-import { formatCurrency, formatDateShort, groupByDate, todayISO } from '@/lib/utils';
+import { formatCurrency, formatDateShort, formatMonthKey, getMonthKeyByOffset, groupByDate, todayISO } from '@/lib/utils';
 import { Expense } from '@/types';
-
-function getMonthKey(offset: number): string {
-  const now = new Date(todayISO());
-  const d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function formatMonthKey(key: string): string {
-  const [y, m] = key.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-}
 
 export default function ExpensesScreen() {
   const theme = useTheme();
@@ -40,7 +29,7 @@ export default function ExpensesScreen() {
   const [monthOffset, setMonthOffset] = useState(0);
   const undoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const monthKey = getMonthKey(monthOffset);
+  const monthKey = getMonthKeyByOffset(monthOffset);
   const { data: expenses = [], isLoading, refetch } = useExpensesByMonth(monthKey);
 
   const symbol = DEFAULT_CURRENCY_SYMBOL;

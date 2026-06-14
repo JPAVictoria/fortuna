@@ -22,13 +22,7 @@ import { useHaptics } from '@/hooks/useHaptics';
 import { useToast } from '@/providers/ToastProvider';
 import { useUpdateSettings } from '@/hooks/useSettings';
 import { supabase } from '@/lib/supabase';
-
-function getPasswordStrength(pw: string): { label: string; color: string; score: number } {
-  if (pw.length === 0) return { label: '', color: 'transparent', score: 0 };
-  if (pw.length < 6) return { label: 'Weak', color: '#F87171', score: 1 };
-  if (pw.length < 10 || !/[0-9]/.test(pw)) return { label: 'Fair', color: '#F59E0B', score: 2 };
-  return { label: 'Strong', color: '#10B981', score: 3 };
-}
+import { getPasswordStrength } from '@/lib/utils';
 
 export default function SignUpScreen() {
   const theme = useTheme();
