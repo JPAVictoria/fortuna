@@ -1,6 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BalanceHeader } from '@/components/dashboard/BalanceHeader';
@@ -9,6 +10,7 @@ import { FortunaQuote } from '@/components/dashboard/FortunaQuote';
 import { FortuneScoreCard } from '@/components/dashboard/FortuneScoreCard';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { SpendingInsights } from '@/components/dashboard/SpendingInsights';
+import { SpendingTrendChart } from '@/components/dashboard/SpendingTrendChart';
 import { TopExpensesChart } from '@/components/dashboard/TopExpensesChart';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -16,11 +18,11 @@ import { FortunaLogo } from '@/components/ui/FortunaLogo';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { useCategories, useCurrentMonthExpenses, useTopCategories } from '@/hooks/useExpenses';
+import { useCategories, useCurrentMonthExpenses, useMonthlyTotals, useTopCategories } from '@/hooks/useExpenses';
 import { useFortuneScore } from '@/hooks/useFortuneScore';
 import { useTotalSaved } from '@/hooks/useSavings';
 import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
-import { formatMonth, getGreeting, todayISO } from '@/lib/utils';
+import { formatCurrency, formatMonth, getGreeting, todayISO } from '@/lib/utils';
 
 export default function DashboardScreen() {
   const theme = useTheme();
@@ -32,12 +34,29 @@ export default function DashboardScreen() {
   const { total: totalSaved } = useTotalSaved();
   const fortuneScore = useFortuneScore();
 
+  const { data: monthlyTotals } = useMonthlyTotals(6);
+
   const symbol = DEFAULT_CURRENCY_SYMBOL;
   const name = settings?.userName ?? 'You';
   const [scoreExpanded, setScoreExpanded] = useState(false);
   const budget = settings?.monthlyBudget;
   const recentFive = monthExpenses.slice(0, 5);
   const totalSpent = monthExpenses.reduce((s, e) => s + e.amount, 0);
+
+  async function handleShare() {
+    const topCat = topCategories?.[0];
+    const topCatData = topCat ? categories.find(c => c.id === topCat.categoryId) : null;
+    const lines = [
+      `📊 Fortuna — ${formatMonth(todayISO())}`,
+      `━━━━━━━━━━━━━━━`,
+      `💸 Spent: ${formatCurrency(totalSpent, symbol)}`,
+      budget ? `📉 Budget used: ${Math.round((totalSpent / budget) * 100)}%` : null,
+      `💰 Total saved: ${formatCurrency(totalSaved, symbol)}`,
+      topCatData ? `🏆 Top: ${topCatData.icon} ${topCatData.name} (${formatCurrency(topCat!.amount, symbol)})` : null,
+      `🎯 Fortune Score: ${fortuneScore.grade} (${fortuneScore.total}/100)`,
+    ].filter(Boolean).join('\n');
+    await Share.share({ message: lines });
+  }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top']}>
@@ -59,12 +78,17 @@ export default function DashboardScreen() {
             </View>
           </View>
           {!isLoading && (
-            <TouchableOpacity
-              onPress={() => router.push('/add-expense')}
-              accessibilityLabel="Log expense"
-              style={[styles.quickAdd, { backgroundColor: theme.primaryDim, borderColor: theme.primary + '44' }]}>
-              <Text style={[styles.quickAddLabel, { color: theme.primary }]}>+ Log</Text>
-            </TouchableOpacity>
+            <View style={styles.headerRight}>
+              <TouchableOpacity onPress={handleShare} hitSlop={8} accessibilityLabel="Share summary">
+                <Ionicons name="share-outline" size={20} color={theme.textMuted} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push('/add-expense')}
+                accessibilityLabel="Log expense"
+                style={[styles.quickAdd, { backgroundColor: theme.primaryDim, borderColor: theme.primary + '44' }]}>
+                <Text style={[styles.quickAddLabel, { color: theme.primary }]}>+ Log</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
 
@@ -158,6 +182,13 @@ export default function DashboardScreen() {
           </Card>
         )}
 
+        {/* 6-Month Trend */}
+        {monthlyTotals && monthlyTotals.some(d => d.total > 0) && (
+          <Card padded>
+            <SpendingTrendChart data={monthlyTotals} currencySymbol={symbol} />
+          </Card>
+        )}
+
         {/* Top 3 Categories */}
         <Card padded>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Top Categories</Text>
@@ -203,6 +234,7 @@ const styles = StyleSheet.create({
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   greeting: { fontSize: FontSize.sm, fontWeight: '600' },
   month: { fontSize: FontSize.lg, fontWeight: '700', marginTop: 1 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   quickAdd: { paddingHorizontal: Spacing.md, paddingVertical: 8, borderRadius: BorderRadius.full, borderWidth: 1 },
   quickAddLabel: { fontSize: FontSize.sm, fontWeight: '700' },
   actions: { flexDirection: 'row', gap: Spacing.sm },

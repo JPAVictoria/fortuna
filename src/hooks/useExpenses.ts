@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { DEFAULT_CATEGORIES } from '@/constants/categories';
@@ -69,6 +70,21 @@ export function useUpdateExpense() {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['expenses'] }),
   });
+}
+
+export function useMonthlyTotals(monthCount = 6) {
+  const { data: expenses = [], isLoading } = useExpenses();
+  const data = useMemo(() => {
+    const now = new Date();
+    return Array.from({ length: monthCount }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (monthCount - 1 - i), 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = d.toLocaleDateString('en-US', { month: 'short' });
+      const total = expenses.filter(e => e.date.startsWith(key)).reduce((s, e) => s + e.amount, 0);
+      return { key, label, total };
+    });
+  }, [expenses, monthCount]);
+  return { data, isLoading };
 }
 
 export function useTopCategories(limit = 3) {
