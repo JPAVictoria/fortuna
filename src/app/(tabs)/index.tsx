@@ -20,6 +20,7 @@ import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useCategories, useCurrentMonthExpenses, useMonthlyTotals, useTopCategories } from '@/hooks/useExpenses';
 import { useFortuneScore } from '@/hooks/useFortuneScore';
+import { useCurrentMonthIncome } from '@/hooks/useIncome';
 import { useTotalSaved } from '@/hooks/useSavings';
 import { DEFAULT_CURRENCY_SYMBOL, useSettings } from '@/hooks/useSettings';
 import { formatCurrency, formatMonth, getGreeting, todayISO } from '@/lib/utils';
@@ -35,6 +36,7 @@ export default function DashboardScreen() {
   const fortuneScore = useFortuneScore();
 
   const { data: monthlyTotals } = useMonthlyTotals(6);
+  const { data: monthIncome = [] } = useCurrentMonthIncome();
 
   const symbol = DEFAULT_CURRENCY_SYMBOL;
   const name = settings?.userName ?? 'You';
@@ -42,6 +44,8 @@ export default function DashboardScreen() {
   const budget = settings?.monthlyBudget;
   const recentFive = monthExpenses.slice(0, 5);
   const totalSpent = monthExpenses.reduce((s, e) => s + e.amount, 0);
+  const totalIncome = monthIncome.reduce((s, i) => s + i.amount, 0);
+  const netBalance = totalIncome > 0 ? totalIncome - totalSpent : null;
 
   async function handleShare() {
     const topCat = topCategories?.[0];
@@ -124,17 +128,37 @@ export default function DashboardScreen() {
             style={[styles.actionBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
             onPress={() => router.push('/add-expense')}
             accessibilityLabel="Add expense">
-            <Text style={styles.actionIcon}>💸</Text>
+            <Ionicons name="card-outline" size={18} color={theme.text} />
             <Text style={[styles.actionLabel, { color: theme.text }]}>Add Expense</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionBtn, { backgroundColor: theme.surface, borderColor: theme.primary + '44' }]}
+            onPress={() => router.push('/add-income')}
+            accessibilityLabel="Record income">
+            <Ionicons name="trending-up-outline" size={18} color={theme.primary} />
+            <Text style={[styles.actionLabel, { color: theme.text }]}>Add Income</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionBtn, { backgroundColor: theme.surface, borderColor: theme.goldDim }]}
             onPress={() => router.push('/add-goal')}
             accessibilityLabel="Save money">
-            <Text style={styles.actionIcon}>🪙</Text>
+            <Ionicons name="wallet-outline" size={18} color={theme.gold} />
             <Text style={[styles.actionLabel, { color: theme.text }]}>Save Money</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Net balance (only when income recorded) */}
+        {netBalance !== null && (
+          <View style={[styles.netCard, { backgroundColor: netBalance >= 0 ? theme.primaryDim : theme.errorDim, borderColor: netBalance >= 0 ? theme.primary + '44' : theme.error + '44' }]}>
+            <Text style={[styles.netLabel, { color: theme.textSecondary }]}>NET THIS MONTH</Text>
+            <Text style={[styles.netAmt, { color: netBalance >= 0 ? theme.primary : theme.error }]}>
+              {netBalance >= 0 ? '+' : ''}{formatCurrency(netBalance, symbol)}
+            </Text>
+            <Text style={[styles.netSub, { color: theme.textMuted }]}>
+              {formatCurrency(totalIncome, symbol)} income · {formatCurrency(totalSpent, symbol)} spent
+            </Text>
+          </View>
+        )}
 
         {/* Spending Insights */}
         {monthExpenses.length > 0 && (
@@ -237,10 +261,13 @@ const styles = StyleSheet.create({
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   quickAdd: { paddingHorizontal: Spacing.md, paddingVertical: 8, borderRadius: BorderRadius.full, borderWidth: 1 },
   quickAddLabel: { fontSize: FontSize.sm, fontWeight: '700' },
-  actions: { flexDirection: 'row', gap: Spacing.sm },
-  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.lg, borderWidth: 1 },
-  actionIcon: { fontSize: 20 },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.lg, borderWidth: 1, minWidth: '30%', flex: 1 },
   actionLabel: { fontSize: FontSize.sm, fontWeight: '600' },
+  netCard: { borderRadius: BorderRadius.lg, borderWidth: 1, padding: Spacing.md, gap: 2 },
+  netLabel: { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 0.8 },
+  netAmt: { fontSize: FontSize.xxl, fontWeight: '700' },
+  netSub: { fontSize: FontSize.sm },
   skeletonWrap: { gap: Spacing.sm },
   skeletonRow: { flexDirection: 'row', gap: Spacing.sm },
   section: { gap: Spacing.sm },

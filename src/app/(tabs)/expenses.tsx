@@ -12,8 +12,9 @@ import { SkeletonCard } from '@/components/ui/SkeletonLoader';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { FALLBACK_CATEGORY_COLOR } from '@/constants/categories';
 import { useTheme } from '@/hooks/use-theme';
-import { useCategories, useExpensesByMonth, useDeleteExpense } from '@/hooks/useExpenses';
+import { useAddExpense, useCategories, useExpensesByMonth, useDeleteExpense } from '@/hooks/useExpenses';
 import { useHaptics } from '@/hooks/useHaptics';
+import { useApplyRecurring, useDueRecurring } from '@/hooks/useRecurring';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useToast } from '@/providers/ToastProvider';
 import { formatCurrency, formatDateShort, formatMonthKey, getMonthKeyByOffset, groupByDate, todayISO } from '@/lib/utils';
@@ -23,6 +24,9 @@ export default function ExpensesScreen() {
   const theme = useTheme();
   const { data: categories = [] } = useCategories();
   const { mutate: deleteExpense } = useDeleteExpense();
+  const { mutate: addExpense } = useAddExpense();
+  const { data: dueRecurring = [] } = useDueRecurring();
+  const { mutate: applyRecurring } = useApplyRecurring();
   const haptics = useHaptics();
   const toast = useToast();
 
@@ -171,6 +175,41 @@ export default function ExpensesScreen() {
                   {filtered.length} transaction{filtered.length !== 1 ? 's' : ''}
                 </Text>
               </View>
+
+              {/* Due recurring expenses */}
+              {dueRecurring.length > 0 && (
+                <View style={[styles.recurringBanner, { backgroundColor: theme.primaryDim, borderColor: theme.primary + '44' }]}>
+                  <View style={styles.recurringHeader}>
+                    <Text style={[styles.recurringTitle, { color: theme.primary }]}>Due Recurring ({dueRecurring.length})</Text>
+                    <TouchableOpacity onPress={() => router.push('/add-recurring')} accessibilityLabel="Add recurring expense">
+                      <Text style={[styles.recurringAdd, { color: theme.primary }]}>+ New</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {dueRecurring.map(r => {
+                    const cat = categories.find(c => c.id === r.categoryId);
+                    return (
+                      <View key={r.id} style={[styles.recurringItem, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                        <Text style={styles.recurringIcon}>{cat?.icon ?? '🔁'}</Text>
+                        <View style={styles.recurringInfo}>
+                          <Text style={[styles.recurringDesc, { color: theme.text }]} numberOfLines={1}>{r.description}</Text>
+                          <Text style={[styles.recurringMeta, { color: theme.textMuted }]}>{r.frequency} · {formatCurrency(r.amount, symbol)}</Text>
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => {
+                            haptics.light();
+                            addExpense({ amount: r.amount, description: r.description, categoryId: r.categoryId, date: todayISO(), notes: r.notes });
+                            applyRecurring(r.id);
+                            toast(`${r.description} logged!`);
+                          }}
+                          style={[styles.recurringApply, { backgroundColor: theme.primary }]}
+                          accessibilityLabel={`Apply ${r.description}`}>
+                          <Text style={styles.recurringApplyLabel}>Log</Text>
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
 
               {/* Category budget bar */}
               {filterCategoryId && (() => {
@@ -323,6 +362,17 @@ const styles = StyleSheet.create({
   bulkCount: { fontSize: FontSize.md, fontWeight: '600' },
   bulkDelete: { paddingHorizontal: Spacing.md, paddingVertical: 8, borderRadius: BorderRadius.md },
   bulkDeleteLabel: { color: '#fff', fontSize: FontSize.sm, fontWeight: '700' },
+  recurringBanner: { marginHorizontal: Spacing.md, marginBottom: Spacing.xs, padding: Spacing.md, borderRadius: BorderRadius.lg, borderWidth: 1, gap: Spacing.sm },
+  recurringHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  recurringTitle: { fontSize: FontSize.sm, fontWeight: '700' },
+  recurringAdd: { fontSize: FontSize.sm, fontWeight: '700' },
+  recurringItem: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.sm, borderRadius: BorderRadius.md, borderWidth: 1 },
+  recurringIcon: { fontSize: 20, width: 28, textAlign: 'center' },
+  recurringInfo: { flex: 1, gap: 1 },
+  recurringDesc: { fontSize: FontSize.sm, fontWeight: '600' },
+  recurringMeta: { fontSize: FontSize.xs },
+  recurringApply: { paddingHorizontal: Spacing.sm, paddingVertical: 5, borderRadius: BorderRadius.sm },
+  recurringApplyLabel: { color: '#fff', fontSize: FontSize.xs, fontWeight: '700' },
   emptySearch: { alignItems: 'center', paddingTop: Spacing.xxl, gap: Spacing.md },
   emptySearchText: { fontSize: FontSize.md },
   clearSearchBtn: { paddingHorizontal: Spacing.lg, paddingVertical: 10, borderRadius: BorderRadius.full, borderWidth: 1.5 },
