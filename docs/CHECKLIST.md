@@ -154,21 +154,21 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress
 ### Financial Intelligence (Be the Best Financial Advisor)
 - [x] Spending insights: MoM comparison, top category concentration warning
 - [x] Budget warnings: balance hero turns red when over budget, bar fills red at 90%+
-- [ ] Per-category monthly budget limits
+- [x] Per-category monthly budget limits
 - [x] Monthly budget report card (S/A/B/C/D/F grade in Fortune Score)
 - [x] "Fortune Score" — 0–100 score: savings rate (40pts) + budget adherence (30pts) + diversity (15pts) + goals (15pts)
-- [ ] Year-in-review summary (December special screen)
+- [x] Year-in-review summary (monthly breakdown, highlights, hero stats)
 - [x] Projected savings date calculator
 
 ### Expense Enhancements
-- [ ] Recurring expense templates (daily, weekly, monthly)
-- [ ] Receipt photo capture and attachment (expo-image-picker)
+- [x] Recurring expense templates (daily, weekly, monthly)
+- [x] Receipt photo capture and attachment (expo-image-picker)
 - [ ] Multi-currency support with real-time conversion
-- [ ] Income tracking alongside expenses
+- [x] Income tracking alongside expenses
 - [ ] Net worth tracker (assets − liabilities)
 - [ ] Bill reminders with push notifications
 - [x] Expense search (by description) + filter by category
-- [ ] Bulk delete / edit expenses
+- [x] Bulk delete / edit expenses
 
 ### Savings Enhancements
 - [x] Confetti animation when a savings goal is completed 🎉
