@@ -37,4 +37,5 @@ export type SavingsDeposit = {
 export type AppSettings = {
   userName: string;
   monthlyBudget?: number;
+  accentColor?: string;
 };

@@ -30,6 +30,7 @@ export default function TabLayout() {
         const cfg = TAB_CONFIG[route.name];
         return {
           headerShown: false,
+          animation: 'shift',
           tabBarActiveTintColor: theme.tabActive,
           tabBarInactiveTintColor: theme.tabInactive,
           tabBarStyle: modalOpen
