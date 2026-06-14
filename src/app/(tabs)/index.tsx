@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -32,6 +33,7 @@ export default function DashboardScreen() {
 
   const symbol = DEFAULT_CURRENCY_SYMBOL;
   const name = settings?.userName ?? 'You';
+  const [scoreExpanded, setScoreExpanded] = useState(false);
   const budget = settings?.monthlyBudget;
   const recentFive = monthExpenses.slice(0, 5);
   const totalSpent = monthExpenses.reduce((s, e) => s + e.amount, 0);
@@ -98,10 +100,27 @@ export default function DashboardScreen() {
           </View>
         )}
 
-        {/* Fortune Score */}
+        {/* Fortune Score (collapsible) */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Fortune Score</Text>
-          <FortuneScoreCard score={fortuneScore} />
+          <TouchableOpacity
+            onPress={() => setScoreExpanded(e => !e)}
+            style={styles.sectionHeader}
+            accessibilityLabel={scoreExpanded ? 'Collapse Fortune Score' : 'Expand Fortune Score'}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Fortune Score</Text>
+            <Text style={[styles.chevron, { color: theme.textMuted }]}>{scoreExpanded ? '▲' : '▼'}</Text>
+          </TouchableOpacity>
+          {scoreExpanded && <FortuneScoreCard score={fortuneScore} />}
+          {!scoreExpanded && (
+            <TouchableOpacity
+              onPress={() => setScoreExpanded(true)}
+              style={[styles.scoreCollapsed, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <Text style={[styles.scoreGrade, { color: fortuneScore.total >= 75 ? theme.primary : theme.gold }]}>
+                {fortuneScore.grade}
+              </Text>
+              <Text style={[styles.scoreNum, { color: theme.textSecondary }]}>{fortuneScore.total}/100</Text>
+              <Text style={[styles.scoreInsight, { color: theme.textMuted }]} numberOfLines={1}>{fortuneScore.insight}</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Pie Chart */}
@@ -169,6 +188,12 @@ const styles = StyleSheet.create({
   actionIcon: { fontSize: 20 },
   actionLabel: { fontSize: FontSize.sm, fontWeight: '600' },
   section: { gap: Spacing.sm },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sectionTitle: { fontSize: FontSize.lg, fontWeight: '700' },
   sectionSub: { fontSize: FontSize.sm, marginTop: 2 },
+  chevron: { fontSize: FontSize.xs },
+  scoreCollapsed: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.lg, borderWidth: 1 },
+  scoreGrade: { fontSize: FontSize.xxl, fontWeight: '800', width: 36 },
+  scoreNum: { fontSize: FontSize.sm, fontWeight: '600' },
+  scoreInsight: { flex: 1, fontSize: FontSize.sm },
 });

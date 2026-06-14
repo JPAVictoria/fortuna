@@ -42,7 +42,14 @@ export function ExpensePieChart({ items, categories, currencySymbol = '₱', siz
   const r = size * 0.44;
   const inner = size * 0.28;
 
-  if (items.length === 0) return null;
+  if (items.length === 0) {
+    return (
+      <View style={styles.noData}>
+        <Text style={[styles.noDataIcon]}>🥧</Text>
+        <Text style={[styles.noDataText, { color: theme.textMuted }]}>No data yet</Text>
+      </View>
+    );
+  }
 
   let angle = 0;
   const slices = items.map(item => {
@@ -108,4 +115,7 @@ const styles = StyleSheet.create({
   dot: { width: 10, height: 10, borderRadius: 5 },
   legendName: { flex: 1, fontSize: FontSize.sm },
   legendPct: { fontSize: FontSize.sm, fontWeight: '600' },
+  noData: { alignItems: 'center', paddingVertical: Spacing.xl, gap: Spacing.sm },
+  noDataIcon: { fontSize: 32 },
+  noDataText: { fontSize: FontSize.sm },
 });

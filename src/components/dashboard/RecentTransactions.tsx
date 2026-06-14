@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { FontSize, Spacing } from '@/constants/theme';
+import { FALLBACK_CATEGORY_COLOR } from '@/constants/categories';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCurrency, formatDateShort } from '@/lib/utils';
 import { Category, Expense } from '@/types';
@@ -12,19 +13,22 @@ type Props = {
   currencySymbol?: string;
 };
 
+import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
+
 export function RecentTransactions({
   expenses,
   categories,
   onViewAll,
-  currencySymbol = '₱',
+  currencySymbol = DEFAULT_CURRENCY_SYMBOL,
 }: Props) {
   const theme = useTheme();
 
   return (
     <View>
+      <Text style={[styles.monthLabel, { color: theme.textMuted }]}>This month</Text>
       {expenses.map((expense) => {
         const cat = categories.find((c) => c.id === expense.categoryId);
-        const color = cat?.color ?? '#6B7280';
+        const color = cat?.color ?? FALLBACK_CATEGORY_COLOR;
 
         return (
           <View
@@ -83,6 +87,7 @@ const styles = StyleSheet.create({
   desc: { fontSize: FontSize.md, fontWeight: '500' },
   meta: { fontSize: FontSize.sm },
   amount: { fontSize: FontSize.md, fontWeight: '700' },
+  monthLabel: { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 0.8, marginBottom: Spacing.xs },
   empty: { fontSize: FontSize.sm, textAlign: 'center', paddingVertical: Spacing.lg },
   viewAll: { paddingTop: Spacing.md, alignItems: 'center' },
   viewAllText: { fontSize: FontSize.sm, fontWeight: '600' },

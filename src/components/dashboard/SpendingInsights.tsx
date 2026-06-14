@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -11,6 +12,7 @@ type Insight = { icon: string; text: string; type: 'good' | 'warning' | 'info' }
 
 export function SpendingInsights({ currencySymbol = DEFAULT_CURRENCY_SYMBOL }: { currencySymbol?: string }) {
   const theme = useTheme();
+  const [showAll, setShowAll] = useState(false);
   const { data: expenses = [] } = useExpenses();
   const { data: categories = [] } = useCategories();
 
@@ -80,9 +82,11 @@ export function SpendingInsights({ currencySymbol = DEFAULT_CURRENCY_SYMBOL }: {
   const insightColor = (type: Insight['type']) =>
     type === 'good' ? theme.primary : type === 'warning' ? theme.gold : theme.textSecondary;
 
+  const visible = showAll ? insights : insights.slice(0, 2);
+
   return (
     <View style={styles.container}>
-      {insights.slice(0, 2).map((ins, i) => (
+      {visible.map((ins, i) => (
         <View
           key={i}
           style={[
@@ -99,6 +103,13 @@ export function SpendingInsights({ currencySymbol = DEFAULT_CURRENCY_SYMBOL }: {
           <Text style={[styles.text, { color: theme.text }]}>{ins.text}</Text>
         </View>
       ))}
+      {insights.length > 2 && (
+        <TouchableOpacity onPress={() => setShowAll(v => !v)} style={styles.viewAll}>
+          <Text style={[styles.viewAllText, { color: theme.primary }]}>
+            {showAll ? 'Show less' : `View all ${insights.length} insights →`}
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -115,4 +126,6 @@ const styles = StyleSheet.create({
   },
   icon: { fontSize: 16, marginTop: 1 },
   text: { flex: 1, fontSize: FontSize.sm, lineHeight: 20 },
+  viewAll: { paddingTop: Spacing.xs, alignItems: 'center' },
+  viewAllText: { fontSize: FontSize.sm, fontWeight: '600' },
 });
