@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
 
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
@@ -10,7 +10,10 @@ type Props = TextInputProps & {
   prefix?: string;
 };
 
-export function Input({ label, error, prefix, style, ...rest }: Props) {
+export const Input = forwardRef<TextInput, Props>(function Input(
+  { label, error, prefix, style, ...rest },
+  ref
+) {
   const theme = useTheme();
   const [focused, setFocused] = useState(false);
 
@@ -31,17 +34,18 @@ export function Input({ label, error, prefix, style, ...rest }: Props) {
           <Text style={[styles.prefix, { color: theme.textMuted }]}>{prefix}</Text>
         ) : null}
         <TextInput
+          ref={ref}
           style={[styles.input, { color: theme.text }, style]}
           placeholderTextColor={theme.textMuted}
           onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          onBlur={e => { setFocused(false); rest.onBlur?.(e); }}
           {...rest}
         />
       </View>
       {error ? <Text style={[styles.error, { color: theme.error }]}>{error}</Text> : null}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   wrapper: { gap: 6 },

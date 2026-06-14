@@ -33,6 +33,7 @@ export default function RootLayout() {
             <Stack.Screen name="add-category" options={{ presentation: 'modal', headerShown: false }} />
             <Stack.Screen name="auth/sign-in" options={{ presentation: 'modal', headerShown: false }} />
             <Stack.Screen name="auth/sign-up" options={{ presentation: 'modal', headerShown: false }} />
+            <Stack.Screen name="auth/forgot-password" options={{ presentation: 'modal', headerShown: false }} />
           </Stack>
         </ToastProvider>
       </QueryProvider>

@@ -1,6 +1,14 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useRef, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FortunaLogo } from '@/components/ui/FortunaLogo';
@@ -16,25 +24,30 @@ export default function SignInScreen() {
   const theme = useTheme();
   const haptics = useHaptics();
   const toast = useToast();
+  const passwordRef = useRef<TextInput>(null);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   async function handleSignIn() {
-    if (!email.trim() || !password) {
+    setError('');
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !password) {
       haptics.error();
-      Alert.alert('Missing Fields', 'Please enter your email and password.');
+      setError('Please enter your email and password.');
       return;
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const { error: authError } = await supabase.auth.signInWithPassword({ email: trimmedEmail, password });
     setLoading(false);
 
-    if (error) {
+    if (authError) {
       haptics.error();
-      toast(error.message, 'error');
+      setError(authError.message);
     } else {
       haptics.success();
       toast('Welcome back!');
@@ -56,10 +69,59 @@ export default function SignInScreen() {
             </View>
           </View>
 
-          <Input label="Email" placeholder="you@example.com" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" returnKeyType="next" />
-          <Input label="Password" placeholder="••••••••" value={password} onChangeText={setPassword} secureTextEntry returnKeyType="done" />
+          <Input
+            label="Email"
+            placeholder="you@example.com"
+            value={email}
+            onChangeText={v => { setEmail(v.toLowerCase()); setError(''); }}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+            blurOnSubmit={false}
+          />
 
-          <Button label="Sign In" onPress={handleSignIn} loading={loading} fullWidth size="lg" style={styles.btn} />
+          <View style={styles.passwordWrap}>
+            <Input
+              ref={passwordRef}
+              label="Password"
+              placeholder="••••••••"
+              value={password}
+              onChangeText={v => { setPassword(v); setError(''); }}
+              secureTextEntry={!showPassword}
+              returnKeyType="done"
+              onSubmitEditing={handleSignIn}
+              autoCorrect={false}
+            />
+            <TouchableOpacity
+              style={styles.eyeBtn}
+              onPress={() => setShowPassword(p => !p)}
+              hitSlop={12}
+              accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+            >
+              <Text style={[styles.eyeIcon, { color: theme.textMuted }]}>{showPassword ? '🙈' : '👁'}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => router.push('/auth/forgot-password')}
+            style={styles.forgotWrap}
+            accessibilityLabel="Forgot password"
+          >
+            <Text style={[styles.forgotLabel, { color: theme.primary }]}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          {error ? <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text> : null}
+
+          <Button
+            label="Sign In"
+            onPress={handleSignIn}
+            loading={loading}
+            fullWidth
+            size="lg"
+            style={styles.btn}
+          />
 
           <View style={styles.switchRow}>
             <Text style={[styles.switchText, { color: theme.textMuted }]}>Don't have an account? </Text>
@@ -86,7 +148,13 @@ const styles = StyleSheet.create({
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginBottom: Spacing.md },
   title: { fontSize: FontSize.xxl, fontWeight: '800' },
   sub: { fontSize: FontSize.sm, marginTop: 2 },
-  btn: { marginTop: Spacing.sm },
+  passwordWrap: { position: 'relative' },
+  eyeBtn: { position: 'absolute', right: Spacing.md, bottom: 16 },
+  eyeIcon: { fontSize: 18 },
+  forgotWrap: { alignSelf: 'flex-end', marginTop: -Spacing.xs },
+  forgotLabel: { fontSize: FontSize.sm, fontWeight: '600' },
+  errorText: { fontSize: FontSize.sm, textAlign: 'center' },
+  btn: { marginTop: Spacing.xs },
   switchRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
   switchText: { fontSize: FontSize.sm },
   switchLink: { fontSize: FontSize.sm, fontWeight: '700' },
