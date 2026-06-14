@@ -68,6 +68,7 @@ export default function ExpensesScreen() {
             categoryId: expense.categoryId,
             date: expense.date,
             notes: expense.notes ?? '',
+            photoUri: expense.photoUri ?? '',
           },
         }),
       },

@@ -1,9 +1,11 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -40,6 +42,7 @@ export default function EditExpenseModal() {
     categoryId: string;
     date: string;
     notes: string;
+    photoUri: string;
   }>();
 
   const [amount, setAmount] = useState(
@@ -52,6 +55,26 @@ export default function EditExpenseModal() {
   );
   const [date, setDate] = useState(new Date(params.date ?? Date.now()));
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [photoUri, setPhotoUri] = useState<string | undefined>(params.photoUri || undefined);
+
+  async function pickPhoto(useCamera: boolean) {
+    const perm = useCamera
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) { Alert.alert('Permission needed', 'Please allow access in Settings.'); return; }
+    const result = useCamera
+      ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.7, allowsEditing: true, aspect: [4, 3] })
+      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7, allowsEditing: true, aspect: [4, 3] });
+    if (!result.canceled) setPhotoUri(result.assets[0].uri);
+  }
+
+  function handleAddPhoto() {
+    Alert.alert('Add Receipt', undefined, [
+      { text: 'Camera', onPress: () => pickPhoto(true) },
+      { text: 'Photo Library', onPress: () => pickPhoto(false) },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  }
 
   const parsedAmount = parseFloat(amount.replace(/,/g, ""));
   const canSubmit =
@@ -89,6 +112,7 @@ export default function EditExpenseModal() {
         categoryId: selectedCategoryId,
         date: date.toISOString(),
         notes: notes.trim() || undefined,
+        photoUri,
       },
       {
         onSuccess: () => {
@@ -243,6 +267,23 @@ export default function EditExpenseModal() {
               multiline
               style={{ minHeight: 64, textAlignVertical: "top" }}
             />
+            {/* Receipt photo */}
+            <View>
+              {photoUri ? (
+                <View style={styles.photoPreviewWrap}>
+                  <Image source={{ uri: photoUri }} style={styles.photoPreview} />
+                  <TouchableOpacity onPress={() => setPhotoUri(undefined)} style={styles.photoRemove} accessibilityLabel="Remove photo">
+                    <Ionicons name="close-circle" size={22} color="#EF4444" />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity onPress={handleAddPhoto} style={[styles.photoBtn, { borderColor: theme.border, backgroundColor: theme.backgroundElement }]} accessibilityLabel="Add receipt photo">
+                  <Ionicons name="camera-outline" size={18} color={theme.textMuted} />
+                  <Text style={[styles.photoBtnLabel, { color: theme.textMuted }]}>Add Receipt Photo</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
             <Button
               label="Save Changes"
               onPress={handleSubmit}
@@ -304,5 +345,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   dateValue: { fontSize: FontSize.md, fontWeight: "500", flex: 1 },
+  photoBtn: { flexDirection: "row", alignItems: "center", gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.md, borderWidth: 1.5, borderStyle: "dashed" },
+  photoBtnLabel: { fontSize: FontSize.sm },
+  photoPreviewWrap: { position: "relative" },
+  photoPreview: { width: "100%", height: 140, borderRadius: BorderRadius.md },
+  photoRemove: { position: "absolute", top: 6, right: 6 },
   submit: { marginTop: Spacing.sm },
 });

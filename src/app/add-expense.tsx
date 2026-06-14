@@ -1,8 +1,9 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
@@ -28,6 +29,26 @@ export default function AddExpenseModal() {
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [date, setDate] = useState(new Date(todayISO()));
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [photoUri, setPhotoUri] = useState<string | undefined>();
+
+  async function pickPhoto(useCamera: boolean) {
+    const perm = useCamera
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) { Alert.alert('Permission needed', 'Please allow access in Settings.'); return; }
+    const result = useCamera
+      ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.7, allowsEditing: true, aspect: [4, 3] })
+      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7, allowsEditing: true, aspect: [4, 3] });
+    if (!result.canceled) setPhotoUri(result.assets[0].uri);
+  }
+
+  function handleAddPhoto() {
+    Alert.alert('Add Receipt', undefined, [
+      { text: 'Camera', onPress: () => pickPhoto(true) },
+      { text: 'Photo Library', onPress: () => pickPhoto(false) },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  }
 
   function handleSubmit() {
     const parsed = parseFloat(amount.replace(/,/g, ''));
@@ -48,7 +69,7 @@ export default function AddExpenseModal() {
     }
 
     addExpense(
-      { amount: parsed, description: description.trim(), categoryId: selectedCategoryId, date: date.toISOString(), notes: notes.trim() || undefined },
+      { amount: parsed, description: description.trim(), categoryId: selectedCategoryId, date: date.toISOString(), notes: notes.trim() || undefined, photoUri },
       {
         onSuccess: () => {
           haptics.success();
@@ -123,6 +144,24 @@ export default function AddExpenseModal() {
           )}
 
           <Input label="Notes (optional)" placeholder="Add a note..." value={notes} onChangeText={setNotes} multiline style={{ minHeight: 64, textAlignVertical: 'top' }} />
+
+          {/* Receipt photo */}
+          <View style={styles.photoSection}>
+            {photoUri ? (
+              <View style={styles.photoPreviewWrap}>
+                <Image source={{ uri: photoUri }} style={styles.photoPreview} />
+                <TouchableOpacity onPress={() => setPhotoUri(undefined)} style={styles.photoRemove} accessibilityLabel="Remove photo">
+                  <Ionicons name="close-circle" size={22} color="#EF4444" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity onPress={handleAddPhoto} style={[styles.photoBtn, { borderColor: theme.border, backgroundColor: theme.backgroundElement }]} accessibilityLabel="Add receipt photo">
+                <Ionicons name="camera-outline" size={18} color={theme.textMuted} />
+                <Text style={[styles.photoBtnLabel, { color: theme.textMuted }]}>Add Receipt Photo</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
           <Button label="Log Expense" onPress={handleSubmit} loading={isPending} fullWidth size="lg" style={styles.submit} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -147,5 +186,11 @@ const styles = StyleSheet.create({
   chipLabel: { fontSize: FontSize.sm, fontWeight: '500' },
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.md, borderWidth: 1.5 },
   dateValue: { fontSize: FontSize.md, fontWeight: '500', flex: 1 },
+  photoSection: { gap: Spacing.xs },
+  photoBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.md, borderWidth: 1.5, borderStyle: 'dashed' },
+  photoBtnLabel: { fontSize: FontSize.sm },
+  photoPreviewWrap: { position: 'relative' },
+  photoPreview: { width: '100%', height: 140, borderRadius: BorderRadius.md },
+  photoRemove: { position: 'absolute', top: 6, right: 6 },
   submit: { marginTop: Spacing.sm },
 });
