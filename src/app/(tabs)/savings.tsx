@@ -21,6 +21,7 @@ export default function SavingsScreen() {
   const { total } = useTotalSaved();
   const haptics = useHaptics();
   const symbol = DEFAULT_CURRENCY_SYMBOL;
+  const totalTarget = goals.reduce((s, g) => s + g.targetAmount, 0);
 
   const completed = goals.filter(g => g.currentAmount >= g.targetAmount);
   const active = goals.filter(g => g.currentAmount < g.targetAmount);
@@ -47,6 +48,11 @@ export default function SavingsScreen() {
           <View style={[styles.goldBar, { backgroundColor: theme.gold }]} />
           <Text style={[styles.heroLabel, { color: theme.gold }]}>TOTAL SAVED</Text>
           <Text style={[styles.heroAmount, { color: theme.text }]}>{formatCurrency(total, symbol)}</Text>
+          {totalTarget > 0 && (
+            <Text style={[styles.heroBreakdown, { color: theme.textSecondary }]}>
+              of {formatCurrency(totalTarget, symbol)} across {goals.length} goal{goals.length !== 1 ? 's' : ''}
+            </Text>
+          )}
           <Text style={[styles.heroCount, { color: theme.textMuted }]}>
             {active.length} active · {completed.length} completed
           </Text>
@@ -101,6 +107,7 @@ const styles = StyleSheet.create({
   goldBar: { position: 'absolute', top: 0, left: 0, right: 0, height: 3 },
   heroLabel: { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 1 },
   heroAmount: { fontSize: FontSize.display, fontWeight: '700', letterSpacing: -1, lineHeight: 50 },
+  heroBreakdown: { fontSize: FontSize.sm, fontWeight: '500' },
   heroCount: { fontSize: FontSize.sm },
   section: { gap: Spacing.sm },
   sectionLabel: { fontSize: FontSize.xs, fontWeight: '700', letterSpacing: 0.8 },

@@ -82,6 +82,21 @@ export function daysUntil(isoString: string): number {
   return Math.ceil((target - now) / 86400000);
 }
 
+export function projectCompletionDate(
+  currentAmount: number,
+  targetAmount: number,
+  createdAt: string
+): string | null {
+  if (currentAmount <= 0 || currentAmount >= targetAmount) return null;
+  const elapsed = Date.now() - new Date(createdAt).getTime();
+  const rate = currentAmount / elapsed;
+  if (rate <= 0) return null;
+  const remaining = targetAmount - currentAmount;
+  const msNeeded = remaining / rate;
+  const completionDate = new Date(Date.now() + msNeeded);
+  return completionDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }

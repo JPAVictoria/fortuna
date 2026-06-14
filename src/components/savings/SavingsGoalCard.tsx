@@ -6,7 +6,7 @@ import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useTheme } from '@/hooks/use-theme';
 import { useDeleteSavingsGoal, useDeleteDeposit, useSavingsDeposits } from '@/hooks/useSavings';
-import { daysUntil, formatCurrency, formatDateShort } from '@/lib/utils';
+import { daysUntil, formatCurrency, formatDateShort, projectCompletionDate } from '@/lib/utils';
 import { SavingsGoal } from '@/types';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 
@@ -26,6 +26,7 @@ export function SavingsGoalCard({ goal, onDeposit, currencySymbol = DEFAULT_CURR
   const progress = goal.targetAmount > 0 ? goal.currentAmount / goal.targetAmount : 0;
   const isComplete = progress >= 1;
   const days = goal.deadline ? daysUntil(goal.deadline) : null;
+  const projected = !isComplete ? projectCompletionDate(goal.currentAmount, goal.targetAmount, goal.createdAt) : null;
 
   function handleLongPress() {
     Alert.alert(goal.name, undefined, [
@@ -106,6 +107,12 @@ export function SavingsGoalCard({ goal, onDeposit, currencySymbol = DEFAULT_CURR
         </Text>
       </View>
 
+      {projected && (
+        <Text style={[styles.projected, { color: theme.textMuted }]}>
+          At this pace, done by {projected}
+        </Text>
+      )}
+
       {!isComplete && (
         <TouchableOpacity
           style={[styles.depositBtn, { backgroundColor: goal.color + '22', borderColor: goal.color + '44' }]}
@@ -173,6 +180,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xs,
   },
   depositLabel: { fontSize: FontSize.sm, fontWeight: '600' },
+  projected: { fontSize: FontSize.xs, fontStyle: 'italic' },
   historySection: {
     marginTop: Spacing.xs,
     paddingTop: Spacing.sm,
