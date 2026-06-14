@@ -1,9 +1,11 @@
 import { router } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SavingsGoalCard } from '@/components/savings/SavingsGoalCard';
 import { Button } from '@/components/ui/Button';
+import { Confetti } from '@/components/ui/Confetti';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FAB } from '@/components/ui/FAB';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
@@ -12,6 +14,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSavingsGoals, useTotalSaved } from '@/hooks/useSavings';
 import { DEFAULT_CURRENCY_SYMBOL } from '@/hooks/useSettings';
 import { useHaptics } from '@/hooks/useHaptics';
+import { useToast } from '@/providers/ToastProvider';
 import { formatCurrency } from '@/lib/utils';
 import { SavingsGoal } from '@/types';
 
@@ -20,8 +23,24 @@ export default function SavingsScreen() {
   const { data: goals = [], isLoading, refetch } = useSavingsGoals();
   const { total } = useTotalSaved();
   const haptics = useHaptics();
+  const toast = useToast();
   const symbol = DEFAULT_CURRENCY_SYMBOL;
   const totalTarget = goals.reduce((s, g) => s + g.targetAmount, 0);
+
+  const [showConfetti, setShowConfetti] = useState(false);
+  const prevCompletedIds = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (isLoading || goals.length === 0) return;
+    const nowComplete = new Set(goals.filter(g => g.currentAmount >= g.targetAmount).map(g => g.id));
+    const newlyDone = [...nowComplete].filter(id => !prevCompletedIds.current.has(id));
+    if (newlyDone.length > 0) {
+      haptics.success();
+      toast('Goal complete! 🏆');
+      setShowConfetti(true);
+    }
+    prevCompletedIds.current = nowComplete;
+  }, [goals, isLoading]);
 
   const completed = goals.filter(g => g.currentAmount >= g.targetAmount);
   const active = goals.filter(g => g.currentAmount < g.targetAmount);
@@ -93,6 +112,7 @@ export default function SavingsScreen() {
       </ScrollView>
 
       {goals.length > 0 && !isLoading && <FAB onPress={() => { haptics.light(); router.push('/add-goal'); }} />}
+      <Confetti visible={showConfetti} onDone={() => setShowConfetti(false)} />
     </SafeAreaView>
   );
 }
