@@ -3,7 +3,11 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BalanceHeader } from '@/components/dashboard/BalanceHeader';
+import { ExpensePieChart } from '@/components/dashboard/ExpensePieChart';
+import { FortunaQuote } from '@/components/dashboard/FortunaQuote';
+import { FortuneScoreCard } from '@/components/dashboard/FortuneScoreCard';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
+import { SpendingInsights } from '@/components/dashboard/SpendingInsights';
 import { TopExpensesChart } from '@/components/dashboard/TopExpensesChart';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -11,6 +15,7 @@ import { FortunaLogo } from '@/components/ui/FortunaLogo';
 import { BorderRadius, FontSize, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useCategories, useCurrentMonthExpenses, useTopCategories } from '@/hooks/useExpenses';
+import { useFortuneScore } from '@/hooks/useFortuneScore';
 import { useTotalSaved } from '@/hooks/useSavings';
 import { useSettings } from '@/hooks/useSettings';
 import { formatMonth, getGreeting, todayISO } from '@/lib/utils';
@@ -18,23 +23,27 @@ import { formatMonth, getGreeting, todayISO } from '@/lib/utils';
 export default function DashboardScreen() {
   const theme = useTheme();
   const { data: settings } = useSettings();
-  const { data: monthExpenses = [], isLoading } = useCurrentMonthExpenses();
+  const { data: monthExpenses = [], isLoading, refetch } = useCurrentMonthExpenses();
   const { data: categories = [] } = useCategories();
-  const { data: topCategories, grandTotal } = useTopCategories(3);
+  const { data: topCategories } = useTopCategories(3);
+  const { data: allTopCategories } = useTopCategories(10);
   const { total: totalSaved } = useTotalSaved();
+  const fortuneScore = useFortuneScore();
 
   const symbol = settings?.currencySymbol ?? '₱';
   const name = settings?.userName ?? 'You';
   const budget = settings?.monthlyBudget;
-
   const recentFive = monthExpenses.slice(0, 5);
+  const totalSpent = monthExpenses.reduce((s, e) => s + e.amount, 0);
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]} edges={['top']}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        onRefresh={refetch}
+        refreshing={isLoading}>
 
         {/* Header */}
         <View style={styles.header}>
@@ -44,9 +53,7 @@ export default function DashboardScreen() {
               <Text style={[styles.greeting, { color: theme.textSecondary }]}>
                 {getGreeting()}, {name}
               </Text>
-              <Text style={[styles.month, { color: theme.text }]}>
-                {formatMonth(todayISO())}
-              </Text>
+              <Text style={[styles.month, { color: theme.text }]}>{formatMonth(todayISO())}</Text>
             </View>
           </View>
           <TouchableOpacity
@@ -56,9 +63,12 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Daily Quote */}
+        <FortunaQuote />
+
         {/* Balance Hero */}
         <BalanceHeader
-          totalSpent={grandTotal}
+          totalSpent={totalSpent}
           totalSaved={totalSaved}
           monthlyBudget={budget}
           currencySymbol={symbol}
@@ -73,27 +83,52 @@ export default function DashboardScreen() {
             <Text style={[styles.actionLabel, { color: theme.text }]}>Add Expense</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: theme.surface, borderColor: theme.goldDim + 'AA' }]}
+            style={[styles.actionBtn, { backgroundColor: theme.surface, borderColor: theme.goldDim }]}
             onPress={() => router.push('/add-goal')}>
             <Text style={styles.actionIcon}>🪙</Text>
             <Text style={[styles.actionLabel, { color: theme.text }]}>Save Money</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Top Categories */}
+        {/* Spending Insights */}
+        {monthExpenses.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Insights</Text>
+            <SpendingInsights currencySymbol={symbol} />
+          </View>
+        )}
+
+        {/* Fortune Score */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Fortune Score</Text>
+          <FortuneScoreCard score={fortuneScore} />
+        </View>
+
+        {/* Pie Chart */}
+        {monthExpenses.length > 0 && (
+          <Card padded>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Breakdown</Text>
+            <Text style={[styles.sectionSub, { color: theme.textMuted }]}>Where your money goes</Text>
+            <View style={{ marginTop: Spacing.md }}>
+              <ExpensePieChart
+                items={allTopCategories ?? []}
+                categories={categories}
+                currencySymbol={symbol}
+              />
+            </View>
+          </Card>
+        )}
+
+        {/* Top 3 Categories */}
         <Card padded>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Top Categories</Text>
           <Text style={[styles.sectionSub, { color: theme.textMuted }]}>This month's spending</Text>
           <View style={{ marginTop: Spacing.md }}>
-            <TopExpensesChart
-              items={topCategories ?? []}
-              categories={categories}
-              currencySymbol={symbol}
-            />
+            <TopExpensesChart items={topCategories ?? []} categories={categories} currencySymbol={symbol} />
           </View>
         </Card>
 
-        {/* Recent Transactions */}
+        {/* Recent */}
         <Card padded>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Recent</Text>
           <Text style={[styles.sectionSub, { color: theme.textMuted }]}>Last 5 transactions</Text>
@@ -114,7 +149,6 @@ export default function DashboardScreen() {
             subtitle="Log your first expense to begin tracking your financial journey."
           />
         )}
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -123,42 +157,18 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { flex: 1 },
-  content: {
-    padding: Spacing.md,
-    gap: Spacing.md,
-    paddingBottom: Spacing.xxxl,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
+  content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xxxl },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   greeting: { fontSize: FontSize.sm, fontWeight: '600' },
   month: { fontSize: FontSize.lg, fontWeight: '700', marginTop: 1 },
-  quickAdd: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 8,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-  },
+  quickAdd: { paddingHorizontal: Spacing.md, paddingVertical: 8, borderRadius: BorderRadius.full, borderWidth: 1 },
   quickAddLabel: { fontSize: FontSize.sm, fontWeight: '700' },
   actions: { flexDirection: 'row', gap: Spacing.sm },
-  actionBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-  },
+  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, padding: Spacing.md, borderRadius: BorderRadius.lg, borderWidth: 1 },
   actionIcon: { fontSize: 20 },
   actionLabel: { fontSize: FontSize.sm, fontWeight: '600' },
+  section: { gap: Spacing.sm },
   sectionTitle: { fontSize: FontSize.lg, fontWeight: '700' },
   sectionSub: { fontSize: FontSize.sm, marginTop: 2 },
 });
